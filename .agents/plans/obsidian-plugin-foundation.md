@@ -122,15 +122,15 @@ Rules that apply to every task:
 
 #### Task 0.1 VERIFY the Day-0 kit and record the pre-flight result
 
-- **IMPLEMENT**: Confirm each Day-0 kit path exists: `.agents/PRD.md`, `.agents/TAD.md`, `.agents/reference/obsidian-community-plugin-development.md`, both `.agents/templates/` files, `.claude/commands/git/commit.md`, `.claude/commands/validate/validate.md`, `.gitignore`. Confirm the Decision Register above is still accurate: re-run the uniqueness check for `task-orchestrator`, and check whether Obsidian has published a newer public release than 1.15.0 (if so, stop and ask the owner whether `minAppVersion` follows it).
+- **IMPLEMENT**: Confirm each Day-0 kit path exists: `.agents/reference/obsidian-community-plugin-development.md`, both `.agents/templates/` files, `.claude/commands/git/commit.md`, `.claude/commands/validate/validate.md`, `.gitignore`. Confirm the Decision Register above is still accurate: re-run the uniqueness check for `task-orchestrator`, and check whether Obsidian has published a newer public release than 1.15.0 (if so, stop and ask the owner whether `minAppVersion` follows it).
 - **GOTCHA**: A missing Day-0 file stops the plan. A present file with incomplete content does not; it is fixed in Task 1.1 and folded into Step 1's commit.
 - **VALIDATE**:
   ```bash
-  for f in .agents/PRD.md .agents/TAD.md .agents/reference/obsidian-community-plugin-development.md .agents/templates/template_readme.md .agents/templates/template_claude_md.md .claude/commands/git/commit.md .claude/commands/validate/validate.md .gitignore; do test -f "$f" && echo "ok $f" || echo "MISSING $f"; done
+  for f in .agents/reference/obsidian-community-plugin-development.md .agents/templates/template_readme.md .agents/templates/template_claude_md.md .claude/commands/git/commit.md .claude/commands/validate/validate.md .gitignore; do test -f "$f" && echo "ok $f" || echo "MISSING $f"; done
   curl -s https://raw.githubusercontent.com/obsidianmd/obsidian-releases/master/community-plugins.json | python3 -I -c "import json,sys; d=json.load(sys.stdin); print('id taken' if any(p['id']=='task-orchestrator' for p in d) else 'id free')"
   gh api repos/obsidianmd/obsidian-releases/releases --jq '[.[] | select(.prerelease==false)][0].tag_name'
   ```
-  Expected: eight `ok` lines, `id free`, `v1.15.0`.
+  Expected: six `ok` lines, `id free`, `v1.15.0`.
 
 #### Task 0.2 VERIFY local prerequisites
 
