@@ -1,0 +1,85 @@
+# --- macOS ---
+.DS_Store
+**/.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+.fseventsd
+.DocumentRevisions-V100
+.TemporaryItems
+.VolumeIcon.icns
+Icon?
+
+# --- Windows / cross-platform OS files ---
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# --- Node and pnpm ---
+# pnpm-lock.yaml is intentionally NOT ignored: commit it.
+node_modules/
+.pnpm-store/
+.pnpm-debug.log*
+npm-debug.log*
+
+# --- Build output ---
+# The release asset main.js is built by CI and attached to releases, never committed.
+main.js
+dist/
+*.tsbuildinfo
+
+# --- Test, coverage and lint caches ---
+coverage/
+.vitest/
+.eslintcache
+.wdio-obsidian-cache/
+
+# --- Development vault (Obsidian state and the built plugin copied into it) ---
+test-vault/.obsidian/workspace*.json
+test-vault/.obsidian/plugins/*/main.js
+test-vault/.obsidian/plugins/*/manifest.json
+test-vault/.obsidian/plugins/*/styles.css
+test-vault/.obsidian/plugins/*/data.json
+test-vault/.obsidian/plugins/hot-reload/
+test-vault/.task-orchestrator/
+
+# --- Secrets and local config ---
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+secrets/
+*.secret
+
+# --- Logs and temp ---
+*.log
+logs/
+tmp/
+temp/
+*.tmp
+*.swp
+*.swo
+*~
+
+# --- Editors and IDEs ---
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+.idea/
+*.iml
+
+# --- Claude Code local (per-user) settings ---
+.claude/settings.local.json
+CLAUDE.local.md
+
+# --- Agent-written reports and notes, kept locally only ---
+.agents/reports/
+.agents/docs/
+docs/reports/
+
+# --- Planning documents kept out of the public repository ---
+.agents/PRD.md
+.agents/TAD.md
