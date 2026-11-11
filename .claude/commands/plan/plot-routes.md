@@ -16,8 +16,8 @@ The definition file is the only channel through which constraints reach the sub-
 
 **Usage examples**
 
-- `/plot-routes .agents/plans/artifacts/auth-redesign/auth-redesign-problem-definition.md`
-- `/plot-routes .agents/plans/artifacts/<slug>/<slug>-problem-definition.md`
+- `/plot-routes docs/plans/artifacts/auth-redesign/auth-redesign-problem-definition.md`
+- `/plot-routes docs/plans/artifacts/<slug>/<slug>-problem-definition.md`
 
 **Arguments received**
 

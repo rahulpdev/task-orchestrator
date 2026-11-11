@@ -14,8 +14,8 @@ This command is a thin, disciplined launcher: it exists to delegate evaluation w
 
 **Usage examples**
 
-- `/chart-course .agents/plans/artifacts/detect-pdf-table/detect-pdf-table-problem-definition.md .agents/plans/artifacts/detect-pdf-table/detect-pdf-table-option-1.yaml .agents/plans/artifacts/detect-pdf-table/detect-pdf-table-option-2.yaml`
-- `/chart-course .agents/plans/artifacts/<slug>/<slug>-problem-definition.md .agents/plans/artifacts/<slug>/<slug>-option-1.yaml .agents/plans/artifacts/<slug>/<slug>-option-2.yaml .agents/plans/artifacts/<slug>/<slug>-option-3.yaml`
+- `/chart-course docs/plans/artifacts/detect-pdf-table/detect-pdf-table-problem-definition.md docs/plans/artifacts/detect-pdf-table/detect-pdf-table-option-1.yaml docs/plans/artifacts/detect-pdf-table/detect-pdf-table-option-2.yaml`
+- `/chart-course docs/plans/artifacts/<slug>/<slug>-problem-definition.md docs/plans/artifacts/<slug>/<slug>-option-1.yaml docs/plans/artifacts/<slug>/<slug>-option-2.yaml docs/plans/artifacts/<slug>/<slug>-option-3.yaml`
 
 **Arguments received**
 

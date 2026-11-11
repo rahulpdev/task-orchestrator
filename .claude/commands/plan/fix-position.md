@@ -1,5 +1,5 @@
 ---
-description: Save the previous AI response verbatim to a markdown file, writing to `.agents/plans/artifacts/<slug>/<slug>-problem-definition.md` using a supplied or inferred kebab-case slug.
+description: Save the previous AI response verbatim to a markdown file, writing to `docs/plans/artifacts/<slug>/<slug>-problem-definition.md` using a supplied or inferred kebab-case slug.
 argument-hint: [slug] (optional - kebab-case slug for the feature/bug; inferred from the previous response if omitted)
 allowed-tools: Read, Write, Bash(mkdir:*), Bash(test:*), AskUserQuestion
 ---
@@ -73,7 +73,7 @@ Follow these steps in order:
    - If normalisation produces an empty slug, stop and ask the user to supply one.
 
 4. **Prepare the target folder and file path.**
-   - Compute the target folder: `.agents/plans/artifacts/<slug>/`.
+   - Compute the target folder: `docs/plans/artifacts/<slug>/`.
    - Compute the target file: `<target-folder>/<slug>-problem-definition.md`.
    - Use `test -e <target-folder>` to check whether the target folder exists.
    - If the target folder does not exist, create it with `mkdir -p`.
@@ -106,7 +106,7 @@ Follow these steps in order:
 - The markdown file must contain the previous AI response verbatim and nothing else.
 - Do not save a response that lacks any section named in Step 1.
 - Do not overwrite an existing file without explicit user confirmation.
-- Do not save the file outside `.agents/plans/artifacts/<slug>/`.
+- Do not save the file outside `docs/plans/artifacts/<slug>/`.
 - Do not use a timestamp, random suffix, or generated ID in the slug unless the user explicitly provided one.
 - Do not claim success unless the saved file passes exact readback verification.
 - Do not include the saved response body in the command output.
