@@ -2,4 +2,10 @@ packages:
     - 'packages/*'
 
 allowBuilds:
+    # esbuild's install script places its native binary; the build needs it.
     esbuild: true
+    # Ships prebuilt binaries for macOS and Linux x64; its install step only compiles when none match.
+    classic-level: false
+    # Download Edge and Firefox drivers; the real-Obsidian tests use neither browser.
+    edgedriver: false
+    geckodriver: false

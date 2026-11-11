@@ -1,0 +1,52 @@
+name: Check for new Obsidian
+
+# Runs the real-Obsidian tests whenever Obsidian publishes a new version.
+# GitHub disables scheduled workflows after 60 days without repository activity.
+on:
+    schedule:
+        - cron: '42 13 * * *'
+
+jobs:
+    check:
+        runs-on: ubuntu-latest
+        permissions:
+            actions: write
+        steps:
+            - name: Check if there is a new Obsidian version
+              uses: actions/github-script@v9
+              with:
+                  script: |
+                      // wdio-obsidian-service reads Obsidian versions and their metadata from this file.
+                      const obsidianVersionsUrl = 'https://raw.githubusercontent.com/jesse-r-s-hines/wdio-obsidian-service/HEAD/obsidian-versions.json';
+                      const versions = await fetch(obsidianVersionsUrl).then((response) => response.json());
+                      const lastObsidianUpdateTime = new Date(versions.metadata.timestamp);
+
+                      // Time of this workflow's last successful run.
+                      const workflowId = process.env.GITHUB_WORKFLOW_REF.match(/.*?\/.*?\/(.*)@.*/)[1];
+                      const response = await github.rest.actions.listWorkflowRuns({
+                          owner: context.repo.owner,
+                          repo: context.repo.repo,
+                          workflow_id: workflowId,
+                          status: 'success',
+                          per_page: 1,
+                      });
+                      const lastWorkflowRun = response.data.workflow_runs[0];
+                      const lastWorkflowRunTime = new Date(lastWorkflowRun?.created_at ?? 0);
+
+                      if (isNaN(lastObsidianUpdateTime.getTime()) || isNaN(lastWorkflowRunTime.getTime())) {
+                          throw Error('Failed to parse requests');
+                      }
+
+                      // Obsidian updated since the last run, allowing for clock drift.
+                      const dateDiff = lastWorkflowRunTime.getTime() - lastObsidianUpdateTime.getTime();
+                      if (dateDiff < 15 * 60 * 1000) {
+                          console.log('New Obsidian version found, triggering tests.');
+                          await github.rest.actions.createWorkflowDispatch({
+                              owner: context.repo.owner,
+                              repo: context.repo.repo,
+                              workflow_id: 'e2e.yml',
+                              ref: 'main',
+                          });
+                      } else {
+                          console.log('No new Obsidian version.');
+                      }
