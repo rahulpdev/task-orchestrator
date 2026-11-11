@@ -5,7 +5,7 @@ dist/
 coverage/
 .vitest/
 .wdio-obsidian-cache/
-test-vault/.obsidian/
+test-vault/
 .agents/
 .claude/
 .archon/

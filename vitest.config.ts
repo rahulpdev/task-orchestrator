@@ -30,6 +30,20 @@ export default defineConfig({
 					environment: 'node',
 				},
 			},
+			{
+				test: {
+					name: 'test-client',
+					include: ['packages/test-client/src/**/*.test.ts'],
+					environment: 'node',
+				},
+			},
+			{
+				test: {
+					name: 'scripts',
+					include: ['scripts/**/*.test.ts'],
+					environment: 'node',
+				},
+			},
 		],
 	},
 });

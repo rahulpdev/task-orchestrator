@@ -6,7 +6,12 @@
  * 2. A file under a slice folder imports another slice only through that slice's `index.ts`.
  * 3. A file under `shared/` never imports a slice.
  *
- * Usage: `node scripts/check-core-boundary.ts [--root <dir>]` (default `packages/core/src`).
+ * It also bans the host application from the core (TAD 2.1): no file under `src/` may contain
+ * the word "obsidian" in any letter case, in code or comments, and the core's `package.json`
+ * may not list `obsidian` in any dependency field.
+ *
+ * Usage: `node scripts/check-core-boundary.ts [--root <dir>] [--package-json <path>]`
+ * (defaults `packages/core/src` and `packages/core/package.json`).
  * Exits 0 when every rule holds, 1 with one line per violation otherwise.
  *
  * @packageDocumentation
@@ -15,15 +20,22 @@ import { readdir, readFile } from 'node:fs/promises';
 import path from 'node:path';
 import process from 'node:process';
 
-/** One broken rule: the importing file, the specifier as written and the rule it breaks. */
+/** One broken rule: the file, the text that breaks it (a specifier, line or field) and the rule. */
 interface BoundaryViolation {
 	readonly filePath: string;
-	readonly specifier: string;
+	readonly offendingText: string;
 	readonly ruleText: string;
 }
 
 const CORE_FOLDER = 'core';
 const SHARED_FOLDER = 'shared';
+const BANNED_WORD_PATTERN = /obsidian/i;
+const DEPENDENCY_FIELDS = [
+	'dependencies',
+	'devDependencies',
+	'peerDependencies',
+	'optionalDependencies',
+] as const;
 const SPECIFIER_PATTERNS: readonly RegExp[] = [
 	/\bfrom\s+['"]([^'"]+)['"]/g,
 	/\bimport\s+['"]([^'"]+)['"]/g,
@@ -138,7 +150,7 @@ async function checkImports(rootPath: string): Promise<BoundaryViolation[]> {
 			const targetPath = path.resolve(path.dirname(filePath), specifier);
 			const ruleText = brokenRule(rootPath, filePath, targetPath);
 			if (ruleText !== null) {
-				violations.push({ filePath, specifier, ruleText });
+				violations.push({ filePath, offendingText: specifier, ruleText });
 			}
 		}
 	}
@@ -146,17 +158,81 @@ async function checkImports(rootPath: string): Promise<BoundaryViolation[]> {
 }
 
 /**
- * Runs the check from the command line and sets the exit code.
+ * Finds every line of every file under the root that names the host application.
+ *
+ * @param rootPath - The core's `src/` folder.
+ * @returns One violation per offending line.
+ */
+async function checkBannedWord(rootPath: string): Promise<BoundaryViolation[]> {
+	const entries = await readdir(rootPath, { withFileTypes: true, recursive: true });
+	const violations: BoundaryViolation[] = [];
+	for (const entry of entries.filter((candidate) => candidate.isFile())) {
+		const filePath = path.join(entry.parentPath, entry.name);
+		const lines = (await readFile(filePath, 'utf8')).split('\n');
+		lines.forEach((lineText, lineIndex) => {
+			if (BANNED_WORD_PATTERN.test(lineText)) {
+				const offendingText = `line ${String(lineIndex + 1)}`;
+				violations.push({
+					filePath,
+					offendingText,
+					ruleText: 'the core never names the host application',
+				});
+			}
+		});
+	}
+	return violations;
+}
+
+/**
+ * Checks that the core's package manifest does not depend on the host application's API.
+ *
+ * @param packageJsonPath - Path of the core's `package.json`.
+ * @returns One violation per dependency field that lists `obsidian`.
+ */
+async function checkPackageJson(packageJsonPath: string): Promise<BoundaryViolation[]> {
+	const manifest: unknown = JSON.parse(await readFile(packageJsonPath, 'utf8'));
+	if (typeof manifest !== 'object' || manifest === null) {
+		return [];
+	}
+	const violations: BoundaryViolation[] = [];
+	for (const fieldName of DEPENDENCY_FIELDS) {
+		const dependencies: unknown = Reflect.get(manifest, fieldName);
+		if (
+			typeof dependencies === 'object' &&
+			dependencies !== null &&
+			'obsidian' in dependencies
+		) {
+			violations.push({
+				filePath: packageJsonPath,
+				offendingText: `${fieldName}.obsidian`,
+				ruleText: 'the core never depends on the host application',
+			});
+		}
+	}
+	return violations;
+}
+
+/**
+ * Runs every check from the command line and sets the exit code.
  *
  * @param argumentList - The arguments after the script name.
  * @returns A promise that settles once the result has been printed.
  */
 async function main(argumentList: readonly string[]): Promise<void> {
 	const rootPath = path.resolve(readFlag(argumentList, '--root') ?? 'packages/core/src');
-	const violations = await checkImports(rootPath);
+	const packageJsonPath = path.resolve(
+		readFlag(argumentList, '--package-json') ?? 'packages/core/package.json',
+	);
+	const violations = [
+		...(await checkImports(rootPath)),
+		...(await checkBannedWord(rootPath)),
+		...(await checkPackageJson(packageJsonPath)),
+	];
 	for (const violation of violations) {
 		const shownPath = path.relative(process.cwd(), violation.filePath);
-		console.error(`${shownPath}: '${violation.specifier}' breaks rule: ${violation.ruleText}`);
+		console.error(
+			`${shownPath}: '${violation.offendingText}' breaks rule: ${violation.ruleText}`,
+		);
 	}
 	if (violations.length > 0) {
 		process.exitCode = 1;
