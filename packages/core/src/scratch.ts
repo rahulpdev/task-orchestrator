@@ -64,4 +64,27 @@ export function sides(shape: Shape): number {
 	}
 }
 
+/** Runs a callback after a delay; supplied by the host because the core owns no timers. */
+export type Scheduler = (callback: () => void, delayMs: number) => void;
+
+/**
+ * Builds a greeting once a delay has passed.
+ *
+ * @param name - Who to greet.
+ * @param delayMs - How long to wait, in milliseconds.
+ * @param schedule - Runs the callback after the delay.
+ * @returns A promise that resolves to the greeting after the delay.
+ */
+export function greetAfterDelay(
+	name: string,
+	delayMs: number,
+	schedule: Scheduler,
+): Promise<string> {
+	return new Promise((resolve) => {
+		schedule(() => {
+			resolve(greet(name));
+		}, delayMs);
+	});
+}
+
 console.debug(greet('workspace'));

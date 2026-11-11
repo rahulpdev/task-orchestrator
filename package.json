@@ -15,13 +15,14 @@
 		"format": "prettier --write .",
 		"format:check": "prettier --check .",
 		"typecheck": "pnpm -r run typecheck && tsc --noEmit -p tsconfig.json",
-		"test": "echo \"test: configured in Step 5\"",
+		"test": "vitest run",
 		"e2e": "echo \"e2e: configured in Step 10\"",
 		"check:manifest": "echo \"check:manifest: configured in Step 11\"",
 		"version": "node scripts/version-bump.mjs && git add manifest.json versions.json"
 	},
 	"devDependencies": {
 		"@types/node": "^26.6.6",
+		"@vitest/coverage-v8": "^5.1.0",
 		"eslint": "^10.14.0",
 		"eslint-config-prettier": "^10.1.8",
 		"eslint-import-resolver-typescript": "^4.4.5",
@@ -30,6 +31,8 @@
 		"jiti": "^2.7.0",
 		"prettier": "^3.9.10",
 		"typescript": "^5.9.3",
-		"typescript-eslint": "^8.72.2"
+		"typescript-eslint": "^8.72.2",
+		"vite": "^8.3.7",
+		"vitest": "^5.1.0"
 	}
 }
