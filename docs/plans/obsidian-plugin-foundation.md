@@ -1,6 +1,6 @@
 # Feature: Obsidian plugin foundation (AI-optimised codebase setup)
 
-**Requirements:** `.agents/PRD.md` 1.0 and `.agents/TAD.md` 0.2. **Plan written:** 2026-11-10. **Execute with:** `/implement:execute .agents/plans/obsidian-plugin-foundation.md`, after the project owner approves this plan.
+**Requirements:** `.agents/PRD.md` 1.0 and `.agents/TAD.md` 0.2. **Plan written:** 2026-11-10. **Execute with:** `/implement:execute docs/plans/obsidian-plugin-foundation.md`, after the project owner approves this plan.
 
 ## Feature Description
 
@@ -163,7 +163,7 @@ No commit for Step 0: it writes no code.
   6. `manifest.json` (tab-indented, keys in this order): `{"id": "task-orchestrator", "name": "Personal Task Orchestrator", "version": "0.1.0", "minAppVersion": "1.15.0", "description": "Capture everything in your life in one place, organise it, set priorities and make commitments, then focus on getting stuff done in short bursts and run regular reviews. On paid plans, AI takes care of the organising and reviewing, with a free trial.", "author": "Rahul Parmar", "isDesktopOnly": true}`. No `authorUrl`, no `fundingUrl`.
   7. `versions.json`: `{"0.1.0": "1.15.0"}`.
   8. `LICENSE`: the full Elastic License 2.0 text from https://www.elastic.co/licensing/elastic-license, licensor "Rahul Parmar", copyright year 2026, so GitHub recognises it as `Elastic-2.0`.
-  9. `README.md`: one heading and one sentence ("Personal Task Orchestrator. Full README is written in Step 12 of `.agents/plans/obsidian-plugin-foundation.md`."). The directory requires a root README; Step 12 replaces it.
+  9. `README.md`: one heading and one sentence ("Personal Task Orchestrator. Full README is written in Step 12 of `docs/plans/obsidian-plugin-foundation.md`."). The directory requires a root README; Step 12 replaces it.
   10. Root `package.json` (write by hand once, then never edit dependency lists by hand): `name: "task-orchestrator"`, `version: "0.1.0"`, `private: true`, `type: "module"`, `license: "Elastic-2.0"`, `packageManager: "pnpm@12.18.0"` (or the exact version `pnpm -v` prints), `engines: { "node": ">=26" }`, and scripts that delegate to packages existing now:
       ```json
       "scripts": {
@@ -195,7 +195,7 @@ No commit for Step 0: it writes no code.
 
 #### Task 1.3 COMMIT Step 1
 
-- **IMPLEMENT**: Stage explicitly: `.gitignore`, `.editorconfig`, `.npmrc`, `.nvmrc`, `manifest.json`, `versions.json`, `styles.css`, `LICENSE`, `README.md`, `package.json`, `pnpm-workspace.yaml` (and `pnpm-lock.yaml` if created), `eslint.config.mts`, `packages/core/package.json`, `packages/core/src/index.ts`, `packages/core/src/scratch.ts`, `packages/plugin/package.json`, `packages/plugin/esbuild.config.mjs`, `packages/plugin/src/main.ts`, `scripts/version-bump.mjs`, `.github/workflows/lint.yml`, `.github/workflows/release.yml`, `.agents/plans/obsidian-plugin-foundation.md`, `.agents/reference/obsidian-community-plugin-development.md`, `.agents/templates/template_readme_obsidian_plugin.md`, `.agents/templates/template_claude_md_obsidian_plugin.md`, `.claude/commands/git/commit.md`, `.claude/commands/validate/validate.md`, `.claude/commands/implement/execute.md`, `.claude/commands/plan/plan-feature.md`. `.agents/PRD.md` and `.agents/TAD.md` are git-ignored and never staged (NOTES C3).
+- **IMPLEMENT**: Stage explicitly: `.gitignore`, `.editorconfig`, `.npmrc`, `.nvmrc`, `manifest.json`, `versions.json`, `styles.css`, `LICENSE`, `README.md`, `package.json`, `pnpm-workspace.yaml` (and `pnpm-lock.yaml` if created), `eslint.config.mts`, `packages/core/package.json`, `packages/core/src/index.ts`, `packages/core/src/scratch.ts`, `packages/plugin/package.json`, `packages/plugin/esbuild.config.mjs`, `packages/plugin/src/main.ts`, `scripts/version-bump.mjs`, `.github/workflows/lint.yml`, `.github/workflows/release.yml`, `docs/plans/obsidian-plugin-foundation.md`, `.agents/reference/obsidian-community-plugin-development.md`, `.agents/templates/template_readme_obsidian_plugin.md`, `.agents/templates/template_claude_md_obsidian_plugin.md`, `.claude/commands/git/commit.md`, `.claude/commands/validate/validate.md`, `.claude/commands/implement/execute.md`, `.claude/commands/plan/plan-feature.md`. `.agents/PRD.md` and `.agents/TAD.md` are git-ignored and never staged (NOTES C3).
 - **COMMIT**: `chore: initial commit — plugin template as a pnpm workspace, planning documents and agent tooling`
 
 ---
