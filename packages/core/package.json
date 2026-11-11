@@ -1,0 +1,10 @@
+{
+	"name": "@task-orchestrator/core",
+	"version": "0.1.0",
+	"private": true,
+	"type": "module",
+	"license": "Elastic-2.0",
+	"exports": {
+		".": "./src/index.ts"
+	}
+}

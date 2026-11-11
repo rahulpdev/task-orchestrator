@@ -1,0 +1,9 @@
+{
+	"id": "task-orchestrator",
+	"name": "Personal Task Orchestrator",
+	"version": "0.1.0",
+	"minAppVersion": "1.15.0",
+	"description": "Capture everything in your life in one place, organise it, set priorities and make commitments, then focus on getting stuff done in short bursts and run regular reviews. On paid plans, AI takes care of the organising and reviewing, with a free trial.",
+	"author": "Rahul Parmar",
+	"isDesktopOnly": true
+}

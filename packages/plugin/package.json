@@ -1,0 +1,11 @@
+{
+	"name": "@task-orchestrator/plugin",
+	"version": "0.1.0",
+	"private": true,
+	"type": "module",
+	"license": "Elastic-2.0",
+	"scripts": {
+		"build": "node esbuild.config.mjs production",
+		"dev": "node esbuild.config.mjs"
+	}
+}
