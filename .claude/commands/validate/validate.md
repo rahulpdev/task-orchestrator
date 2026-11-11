@@ -8,7 +8,7 @@ Execute the following commands in sequence and report results:
 pnpm test
 ```
 
-**Expected:** All tests pass (currently N tests), coverage report printed, execution time < 10 seconds
+**Expected:** All tests pass (currently 202 tests), coverage report printed, execution time < 10 seconds
 
 ## 2. Type Checking
 
@@ -16,7 +16,7 @@ pnpm test
 pnpm typecheck
 ```
 
-**Expected:** Exit code 0 with no diagnostics from any package
+**Expected:** Exit code 0 with no diagnostics from any package (`@task-orchestrator/core`, `@task-orchestrator/plugin`, `@task-orchestrator/test-client`), the root project or `e2e-tests/`
 
 ## 3. Linting
 
@@ -57,7 +57,7 @@ grep -c 'require("obsidian")' main.js
 **Expected:** 1 or more — `obsidian` is required at runtime, not bundled into `main.js`
 
 ```bash
-node scripts/check-bundle-size.mjs
+node scripts/check-bundle-size.ts
 ```
 
 **Expected:** `main.js` is within the size budget
@@ -69,6 +69,16 @@ pnpm check:manifest
 ```
 
 **Expected:** `manifest.json`, `versions.json` and `package.json` versions agree and all manifest rules pass
+
+Check the test client against a copy of the fixture vault:
+
+```bash
+VAULT_COPY="$(mktemp -d)" && cp -R test-vault/. "$VAULT_COPY"
+node packages/test-client/src/cli.ts "$VAULT_COPY" updateSettings '{"language":"en-US"}' > "$VAULT_COPY.result.json" 2> "$VAULT_COPY.log.jsonl"; echo "exit=$?"
+python3 -I -c "import json,sys; r=json.load(open(sys.argv[1])); lines=[json.loads(l) for l in open(sys.argv[2]) if l.strip()]; assert r['ok'] and lines and all(l.get('correlationId')==r['correlationId'] for l in lines); print('test client ok')" "$VAULT_COPY.result.json" "$VAULT_COPY.log.jsonl"
+```
+
+**Expected:** `exit=0`, then `test client ok`: the operation succeeded and every log line on standard error carries the `correlationId` of the `Result` on standard output
 
 ## 5. Real-Obsidian Validation
 
