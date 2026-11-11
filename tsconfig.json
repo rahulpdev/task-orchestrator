@@ -1,13 +1,8 @@
 {
+	"extends": "./tsconfig.base.json",
 	"compilerOptions": {
-		"strict": true,
-		"noEmit": true,
-		"lib": ["ES2021", "DOM"],
-		"module": "nodenext",
-		"moduleResolution": "nodenext",
-		"allowImportingTsExtensions": true,
-		"skipLibCheck": true,
 		"types": ["node"]
 	},
-	"include": ["packages/*/src/**/*.ts", "eslint.config.mts"]
+	"include": ["**/*.ts", "**/*.mts"],
+	"exclude": ["packages", "e2e-tests", "node_modules", "test-vault", "worktrees"]
 }

@@ -6,5 +6,8 @@
 	"license": "Elastic-2.0",
 	"exports": {
 		".": "./src/index.ts"
+	},
+	"scripts": {
+		"typecheck": "tsc --noEmit -p tsconfig.json"
 	}
 }

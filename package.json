@@ -14,7 +14,7 @@
 		"lint": "eslint . --max-warnings 0",
 		"format": "prettier --write .",
 		"format:check": "prettier --check .",
-		"typecheck": "echo \"typecheck: configured in Step 3\"",
+		"typecheck": "pnpm -r run typecheck && tsc --noEmit -p tsconfig.json",
 		"test": "echo \"test: configured in Step 5\"",
 		"e2e": "echo \"e2e: configured in Step 10\"",
 		"check:manifest": "echo \"check:manifest: configured in Step 11\"",
