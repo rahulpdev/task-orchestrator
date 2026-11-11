@@ -9,7 +9,7 @@
 		"node": ">=26"
 	},
 	"scripts": {
-		"build": "pnpm --filter @task-orchestrator/plugin run build",
+		"build": "pnpm typecheck && pnpm --filter @task-orchestrator/plugin run build",
 		"dev": "pnpm --filter @task-orchestrator/plugin run dev",
 		"lint": "eslint . --max-warnings 0 && node scripts/check-core-boundary.ts",
 		"format": "prettier --write .",

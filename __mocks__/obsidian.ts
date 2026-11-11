@@ -45,14 +45,25 @@ export class Modal {
 export class PluginSettingTab {
 	/** The application object the tab was created with. */
 	readonly app: unknown;
+	/** The plugin that owns the tab. */
+	readonly plugin: unknown;
+	/** How many times {@link PluginSettingTab.update} has been called. */
+	updateCount = 0;
 
 	/**
-	 * Keeps the application object, as Obsidian's constructor does.
+	 * Keeps the application object and plugin, as Obsidian's constructor does.
 	 *
 	 * @param app - The application object.
+	 * @param plugin - The plugin that owns the tab.
 	 */
-	constructor(app: unknown = {}) {
+	constructor(app: unknown = {}, plugin: unknown = {}) {
 		this.app = app;
+		this.plugin = plugin;
+	}
+
+	/** Records that the tab asked to be redrawn. */
+	update(): void {
+		this.updateCount += 1;
 	}
 }
 
@@ -73,16 +84,18 @@ export class Setting {
 	}
 }
 
+/** Stand-in for a folder in the vault. */
+export class TFolder {
+	/** Vault-relative path of the folder; `''` for the vault root. */
+	path = '';
+}
+
 /** Stand-in for a file in the vault. */
 export class TFile {
 	/** Vault-relative path, such as `Folder/Note.md`. */
 	path = '';
-}
-
-/** Stand-in for a folder in the vault. */
-export class TFolder {
-	/** Vault-relative path of the folder. */
-	path = '';
+	/** The folder that holds the file, or `null` for none. */
+	parent: TFolder | null = null;
 }
 
 /** Stand-in for the Markdown editor view. */
@@ -126,4 +139,40 @@ export function normalizePath(pathText: string): string {
 		.replace(/\\/g, '/')
 		.replace(/\/+/g, '/')
 		.replace(/^\/+|\/+$/g, '');
+}
+
+/** Stand-in for the result of {@link getFrontMatterInfo}. */
+export interface FrontMatterInfo {
+	readonly exists: boolean;
+	readonly frontmatter: string;
+	readonly from: number;
+	readonly to: number;
+	readonly contentStart: number;
+}
+
+/**
+ * Finds the front matter block the way Obsidian's `getFrontMatterInfo` does for the cases the
+ * tests use: a first line `---` and a later line `---`.
+ *
+ * @param content - The whole note.
+ * @returns Where the front matter is and where the body starts.
+ */
+export function getFrontMatterInfo(content: string): FrontMatterInfo {
+	const noBlock = { exists: false, frontmatter: '', from: 0, to: 0, contentStart: 0 };
+	if (!content.startsWith('---\n')) {
+		return noBlock;
+	}
+	const closingIndex = content.indexOf('\n---', 3);
+	if (closingIndex === -1) {
+		return noBlock;
+	}
+	const afterFence = closingIndex + 4;
+	const contentStart = content[afterFence] === '\n' ? afterFence + 1 : afterFence;
+	return {
+		exists: true,
+		frontmatter: content.slice(4, closingIndex + 1),
+		from: 4,
+		to: closingIndex + 1,
+		contentStart,
+	};
 }
