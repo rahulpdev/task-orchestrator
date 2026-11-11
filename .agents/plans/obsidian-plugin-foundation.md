@@ -226,7 +226,7 @@ No commit for Step 0: it writes no code.
   import eslintConfigPrettier from 'eslint-config-prettier/flat';
 
   export default defineConfig(
-  	globalIgnores(['**/node_modules/', 'main.js', 'dist/', 'coverage/', '.vitest/', '.wdio-obsidian-cache/', 'test-vault/', '.agents/', '.claude/', '.archon/', 'pnpm-lock.yaml']),
+  	globalIgnores(['**/node_modules/', 'main.js', 'dist/', 'coverage/', '.vitest/', '.wdio-obsidian-cache/', 'test-vault/', '.agents/', '.claude/', '.archon/', 'worktrees/', 'pnpm-lock.yaml']),
   	...obsidianmd.configs.recommended,
   	{
   		languageOptions: {
@@ -299,7 +299,7 @@ No commit for Step 0: it writes no code.
 - **IMPLEMENT**:
   - `packages/core/tsconfig.json`: extends `../../tsconfig.base.json`; `"compilerOptions": { "types": [] }` (excludes Node: the core sees only ES2021 and DOM globals); `"include": ["src/**/*.ts"]`.
   - `packages/plugin/tsconfig.json`: extends base; `"compilerOptions": { "module": "preserve", "moduleResolution": "bundler", "types": [] }`; `"include": ["src/**/*.ts"]`. The plugin is bundled by esbuild; it gains Node types only if a later slice needs a Node API (D1 allows it in this package).
-  - Root `tsconfig.json` (replaces the Step 2 temporary one): extends base; `"compilerOptions": { "types": ["node"] }`; `"include": ["**/*.ts", "**/*.mts"]`, `"exclude": ["packages", "e2e-tests", "node_modules", "test-vault"]`. This gives the project service a home for every TypeScript file outside the packages and `e2e-tests/` (which has its own project): root config files, the shim, the scripts and their tests.
+  - Root `tsconfig.json` (replaces the Step 2 temporary one): extends base; `"compilerOptions": { "types": ["node"] }`; `"include": ["**/*.ts", "**/*.mts"]`, `"exclude": ["packages", "e2e-tests", "node_modules", "test-vault", "worktrees"]`. This gives the project service a home for every TypeScript file outside the packages and `e2e-tests/` (which has its own project): root config files, the shim, the scripts and their tests.
   - Install Node types for the root: `pnpm add -D -w @types/node@26` (if no 26.x exists yet, use the latest and record it).
   - Add `"typecheck": "tsc --noEmit -p tsconfig.json"` to each package's `package.json` scripts, and root `"typecheck": "pnpm -r run typecheck && tsc --noEmit -p tsconfig.json"`. `pnpm add -D -w typescript` is already done; packages resolve `tsc` from the root.
 - **GOTCHA**: `pnpm -r run` skips the root package, so the root project is checked by the second command. With `exactOptionalPropertyTypes`, never assign `undefined` to an optional property; omit the key.

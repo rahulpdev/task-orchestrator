@@ -1,14 +1,14 @@
 ---
-description: Merge the single work branch `<type>/<name>` into the local `main` branch with a `--no-ff` merge commit, validate the result with pytest/mypy/pyright, and on success remove the worktree and delete the work branch.
+description: Merge the single work branch `<type>/<name>` into the local `main` branch with a `--no-ff` merge commit, validate the result with Vitest, tsc and ESLint, and on success remove the worktree and delete the work branch.
 argument-hint: [type] <name> (name required - short kebab-case work name; type optional - `feature`, `fix`, `chore` or `docs`, default `feature`; must match what was passed to `/new-worktree`)
-allowed-tools: Bash(git check-ref-format:*), Bash(git rev-parse:*), Bash(git show-ref:*), Bash(git for-each-ref:*), Bash(git status:*), Bash(git diff:*), Bash(git switch:*), Bash(git merge:*), Bash(git commit:*), Bash(git worktree:*), Bash(git branch:*), Bash(git fetch:*), Bash(git rev-list:*), Bash(git -C:*), Bash(test:*), Bash(grep:*), Bash(pwd:*), Bash(dirname:*), Bash(uv --version:*), Bash(uv run:*)
+allowed-tools: Bash(git check-ref-format:*), Bash(git rev-parse:*), Bash(git show-ref:*), Bash(git for-each-ref:*), Bash(git status:*), Bash(git diff:*), Bash(git switch:*), Bash(git merge:*), Bash(git commit:*), Bash(git worktree:*), Bash(git branch:*), Bash(git fetch:*), Bash(git rev-list:*), Bash(git -C:*), Bash(test:*), Bash(grep:*), Bash(pwd:*), Bash(dirname:*), Bash(pnpm --version:*), Bash(node --version:*), Bash(pnpm install:*), Bash(pnpm test:*), Bash(pnpm typecheck:*), Bash(pnpm lint:*)
 ---
 
 # /merge-worktrees: Merge Worktree Into Main
 
 ## Philosophy (Why this exists)
 
-This command finalises a single piece of work by collapsing its worktree and branch back into `main` under one consistent pattern. It prepares a `--no-ff` merge of `<type>/<name>` into the local `main` branch, validates the merged working tree against pytest/mypy/pyright, and only commits the merge once validation passes.
+This command finalises a single piece of work by collapsing its worktree and branch back into `main` under one consistent pattern. It prepares a `--no-ff` merge of `<type>/<name>` into the local `main` branch, validates the merged working tree against Vitest, tsc and ESLint, and only commits the merge once validation passes.
 
 The validation step here is **integration validation**, not feature validation.
 
@@ -71,16 +71,17 @@ Follow these steps in order:
    - **Bare repo**: run `git rev-parse --is-bare-repository`. If output is `true`, stop with "bare repos are not supported by this command."
    - **Linked worktree (covers both the worktree root and any subdirectory of one)**: run `git rev-parse --path-format=absolute --git-dir` and capture as `GD`; run `git rev-parse --path-format=absolute --git-common-dir` and capture as `GCD`. If `GD` != `GCD`, compute `MAIN_ROOT` as `dirname "$GCD"`, then stop with "you are in a linked worktree; cd $MAIN_ROOT and re-run."
    - **Subdirectory of main repo**: run `pwd -P` and capture as `CWD`; run `git rev-parse --show-toplevel` and capture as `TOPLEVEL`. If `CWD` != `TOPLEVEL`, stop with "you are in a subdirectory of the main repo; cd $TOPLEVEL and re-run."
-3. **Confirm this is a uv-managed project and `uv` is installed.**
-   - Run: `test -f pyproject.toml`. If it does not exist, stop and tell the user that this is not a uv-managed project.
-   - Run: `uv --version`. If it fails, stop and tell the user to install `uv`. Do not attempt a fallback installer.
-4. **Confirm the `app/` directory exists at the repo root.**
-   - Run: `test -d app`.
-   - If it does not exist, stop and tell the user that an `app/` directory is required at the repo root.
-5. **Confirm `pytest`, `mypy`, and `pyright` are declared in `pyproject.toml`.**
-   - Run: `grep -qE '"pytest[^A-Za-z0-9_.-]' pyproject.toml && grep -qE '"mypy[^A-Za-z0-9_.-]' pyproject.toml && grep -qE '"pyright[^A-Za-z0-9_.-]' pyproject.toml`.
-   - Each pattern matches the quoted package name with or without a version constraint, such as `"pytest"` or `"pytest>=8.3"`. It does not match a different package whose name only starts the same way, such as `"pytest-cov"`.
-   - If any of the three is missing, stop and tell the user which tool(s) are missing and to add them with `uv add --dev pytest mypy pyright`.
+3. **Confirm this is a pnpm workspace and the toolchain is installed.**
+   - Run: `test -f package.json && test -f pnpm-workspace.yaml && test -f pnpm-lock.yaml`. If any is missing, stop and tell the user that this is not a pnpm workspace with a committed `pnpm-lock.yaml`.
+   - Run: `pnpm --version`. If it fails, stop and tell the user to install `pnpm`. Do not attempt a fallback installer.
+   - Run: `node --version`. If its major version is lower than the version in `.nvmrc`, stop and tell the user to switch to that Node version (the scripts run `.ts` files with Node's built-in type stripping).
+4. **Confirm the `packages/` directory exists at the repo root.**
+   - Run: `test -d packages`.
+   - If it does not exist, stop and tell the user that a `packages/` directory is required at the repo root.
+5. **Confirm `vitest`, `typescript`, and `eslint` are declared in the root `package.json`.**
+   - Run: `grep -qE '"vitest"[[:space:]]*:' package.json && grep -qE '"typescript"[[:space:]]*:' package.json && grep -qE '"eslint"[[:space:]]*:' package.json`.
+   - Each pattern matches the quoted package name as a dependency key, such as `"vitest": "^5.1.0"`. It does not match a different package whose name only starts or ends the same way, such as `"typescript-eslint"` or `"@vitest/coverage-v8"`.
+   - If any of the three is missing, stop and tell the user which tool(s) are missing and to add them with `pnpm add -D -w vitest typescript eslint`.
 6. **Confirm the local `main` branch exists.**
    - Run: `git show-ref --verify --quiet refs/heads/main`.
    - If it does not exist, stop and tell the user that a local `main` branch is required.
@@ -93,7 +94,7 @@ Follow these steps in order:
    - Run: `git -C "worktrees/$FOLDER" branch --show-current`. If the output is empty (detached HEAD) or differs from `$BRANCH`, stop and tell the user to `cd worktrees/$FOLDER && git switch $BRANCH` before re-running.
 9. **Confirm the worktree has no uncommitted or untracked changes from the user.**
    - Run: `git -C "worktrees/$FOLDER" status --porcelain`.
-   - Allow `.venv/` lines in the output. Treat any other non-empty line as user state, including a change to `uv.lock`. If any user state exists, stop and tell the user to commit or discard those changes before re-running.
+   - Allow `node_modules/` lines in the output. Treat any other non-empty line as user state, including a change to `pnpm-lock.yaml`. If any user state exists, stop and tell the user to commit or discard those changes before re-running.
 10. **Confirm the main repo working tree is clean and is not mid-merge.**
     - Run: `git rev-parse -q --verify MERGE_HEAD`. If exit code is 0, stop and tell the user that a merge is already in progress and they should either `git merge --abort` to restore `main`, or finish the merge manually with `git commit`, before re-running.
     - Run: `git status --porcelain`. If non-empty, stop and tell the user the list of dirty paths so they can commit, stash, or ignore them.
@@ -115,11 +116,12 @@ Follow these steps in order:
     - If the merge reports conflicts, capture the conflicting files via `git diff --name-only --diff-filter=U`, run `git merge --abort` to restore `main`, and stop and tell the user the conflict list.
 14. **Run integration validation on the prepared merge.**
     - Run, in order:
-      - `uv run --locked pytest -v --ignore=worktrees`
-      - `uv run --locked mypy app/`
-      - `uv run --locked pyright app/`
-    - The `--locked` flag stops with an error instead of rewriting `uv.lock` when it is missing or out of date. Treat that error as a validation failure.
-    - If any exits non-zero, capture which command failed and the last lines of its output, run `git merge --abort`, and stop and tell the user which command failed and its output.
+      - `pnpm install --frozen-lockfile`
+      - `pnpm test`
+      - `pnpm typecheck`
+      - `pnpm lint`
+    - `pnpm install` brings the main repo's `node_modules` in line with the merged `pnpm-lock.yaml`; the later commands do not do this themselves. The `--frozen-lockfile` flag stops with an error instead of rewriting `pnpm-lock.yaml` when it is missing or out of date. Treat that error as a validation failure.
+    - If any exits non-zero, capture which command failed and the last lines of its output, run `git merge --abort`, then run `pnpm install --frozen-lockfile` to return `node_modules` to `main`'s lockfile, and stop and tell the user which command failed and its output.
 15. **Commit the prepared merge.**
     - Run: `git commit -m "merge: $BRANCH into main"`. Then run `git rev-parse --short HEAD` and capture as `MERGE_COMMIT` for the report. If the commit fails, stop and tell the user the git error, and that the prepared merge is still in place — they can either fix and commit manually or run `git merge --abort` to abandon. Leave the main repo on `main`, as _Returning to the starting branch_ describes.
 16. **Remove the worktree.**
@@ -165,10 +167,10 @@ Return a concise, easy-to-scan summary in plain language at a 16-year-old readin
 
 - **Status**: Success | Partial | Blocked
 - **What you understood**: 1–3 bullets restating the type, name, source branch, and merge target.
-- **What you did**: bullets, in execution order (e.g. switched to `main`, merged with `--no-ff`, ran pytest/mypy/pyright, removed worktree, deleted work branch, returned the main repo to its starting branch, plus the Step 11 freshness outcome verbatim).
+- **What you did**: bullets, in execution order (e.g. switched to `main`, merged with `--no-ff`, ran test/typecheck/lint, removed worktree, deleted work branch, returned the main repo to its starting branch, plus the Step 11 freshness outcome verbatim).
 - **Key results**:
   - Merge: `<type>/<name>` → `main` (include `MERGE_COMMIT` if available)
-  - Validation: pytest / mypy / pyright outcomes
+  - Validation: test / typecheck / lint outcomes
   - Worktree removed: `worktrees/<folder>`
   - Work branch deleted: `<type>/<name>`
   - Main repo branch: the branch it was on before the run, and the branch it is on now
@@ -178,8 +180,8 @@ Return a concise, easy-to-scan summary in plain language at a 16-year-old readin
 
 ## Notes
 
-- Hardcoded assumptions: project uses Python + `uv` with `uv.lock` committed; the user manually verifies the work inside the worktree before invoking this command; project has no web server; project source lives under `app/`; `pytest`, `mypy`, and `pyright` are declared as dev dependencies.
+- Hardcoded assumptions: project uses a pnpm workspace with `pnpm-lock.yaml` committed and the Node version in `.nvmrc`; the user manually verifies the work inside the worktree before invoking this command; project has no web server; project source lives under `packages/`; `vitest`, `typescript`, and `eslint` are declared as root dev dependencies.
 - Validation layering: pre-merge validation is owned by other commands in the worktree. This command only runs the integration-validation layer on the merged tree.
 - Known limitation: between Steps 13 and 15 the main repo is in a mid-merge state. Do not run other git operations on the main repo during this window — `git merge --abort` on failure would undo any unrelated changes staged in another shell.
 - Known limitation: the warn-only fetch in Step 11 always emits an outcome under "What you did" (skipped / up to date / ahead / behind / diverged), but the check itself is best-effort — on network or remote failure it substitutes the git error and proceeds.
-- Known limitation: `pyproject.toml` presence and dev-dependency declarations are checked, but the file's contents are not otherwise validated. In particular, if `[tool.pytest.ini_options].testpaths` resolves into `worktrees/`, Step 14's `--ignore=worktrees` is overridden and pytest will fail mid-merge with a collection error. Keep test discovery roots out of `worktrees/`.
+- Known limitation: `package.json` presence and dev-dependency declarations are checked, but the file's contents are not otherwise validated. In particular, ESLint's `globalIgnores` and the root `tsconfig.json` `exclude` must both list `worktrees/`; otherwise Step 14 lints and type-checks every live worktree, including the one being merged, and fails mid-merge. Keep test discovery roots out of `worktrees/`.

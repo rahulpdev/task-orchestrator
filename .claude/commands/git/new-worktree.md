@@ -1,14 +1,14 @@
 ---
-description: Create a single git worktree branched off the local `main` branch on a branch named `<type>/<name>` (type is `feature`, `fix`, `chore` or `docs`, default `feature`) and install Python/uv dependencies.
+description: Create a single git worktree branched off the local `main` branch on a branch named `<type>/<name>` (type is `feature`, `fix`, `chore` or `docs`, default `feature`) and install pnpm dependencies.
 argument-hint: [type] <name> (name required - short kebab-case work name; type optional - `feature`, `fix`, `chore` or `docs`, default `feature`)
-allowed-tools: Bash(git check-ref-format:*), Bash(git check-ignore:*), Bash(git rev-parse:*), Bash(git show-ref:*), Bash(git for-each-ref:*), Bash(git worktree:*), Bash(git fetch:*), Bash(git rev-list:*), Bash(git -C:*), Bash(test:*), Bash(mkdir:*), Bash(grep:*), Bash(pwd:*), Bash(dirname:*), Bash(uv --version:*), Bash(uv sync:*)
+allowed-tools: Bash(git check-ref-format:*), Bash(git check-ignore:*), Bash(git rev-parse:*), Bash(git show-ref:*), Bash(git for-each-ref:*), Bash(git worktree:*), Bash(git fetch:*), Bash(git rev-list:*), Bash(git -C:*), Bash(test:*), Bash(mkdir:*), Bash(grep:*), Bash(pwd:*), Bash(dirname:*), Bash(pnpm --version:*), Bash(node --version:*), Bash(pnpm install:*)
 ---
 
 # /new-worktree: Create Worktree Off Main
 
 ## Philosophy (Why this exists)
 
-This command keeps work in progress in its own worktree and centralises the setup in one command. It ensures every piece of work must branch off the same base (`main`), follow the same name pattern (`<type>/<name>`), and live in the same ready-to-use Python/uv worktree (`worktrees/<folder>`).
+This command keeps work in progress in its own worktree and centralises the setup in one command. It ensures every piece of work must branch off the same base (`main`), follow the same name pattern (`<type>/<name>`), and live in the same ready-to-use pnpm worktree (`worktrees/<folder>`).
 
 ## Invocation & Arguments (INPUT)
 
@@ -69,16 +69,17 @@ Follow these steps in order:
    - **Bare repo**: run `git rev-parse --is-bare-repository`. If output is `true`, stop with "bare repos are not supported by this command."
    - **Linked worktree (covers both the worktree root and any subdirectory of one)**: run `git rev-parse --path-format=absolute --git-dir` and capture as `GD`; run `git rev-parse --path-format=absolute --git-common-dir` and capture as `GCD`. If `GD` != `GCD`, compute `MAIN_ROOT` as `dirname "$GCD"`, then stop with "you are in a linked worktree; cd $MAIN_ROOT and re-run."
    - **Subdirectory of main repo**: run `pwd -P` and capture as `CWD`; run `git rev-parse --show-toplevel` and capture as `TOPLEVEL`. If `CWD` != `TOPLEVEL`, stop with "you are in a subdirectory of the main repo; cd $TOPLEVEL and re-run."
-3. **Confirm this is a uv-managed project and `uv` is installed.**
-   - Run: `test -f pyproject.toml`. If it does not exist, stop and tell the user that this is not a uv-managed project.
-   - Run: `uv --version`. If it fails, stop and tell the user to install `uv`. Do not attempt a fallback installer.
-4. **Confirm the `app/` directory exists at the repo root.**
-   - Run: `test -d app`.
-   - If it does not exist, stop and tell the user that an `app/` directory is required at the repo root.
-5. **Confirm `pytest`, `mypy`, and `pyright` are declared in `pyproject.toml`.**
-   - Run: `grep -qE '"pytest[^A-Za-z0-9_.-]' pyproject.toml && grep -qE '"mypy[^A-Za-z0-9_.-]' pyproject.toml && grep -qE '"pyright[^A-Za-z0-9_.-]' pyproject.toml`.
-   - Each pattern matches the quoted package name with or without a version constraint, such as `"pytest"` or `"pytest>=8.3"`. It does not match a different package whose name only starts the same way, such as `"pytest-cov"`.
-   - If any of the three is missing, stop and tell the user which tool(s) are missing and to add them with `uv add --dev pytest mypy pyright`.
+3. **Confirm this is a pnpm workspace and the toolchain is installed.**
+   - Run: `test -f package.json && test -f pnpm-workspace.yaml && test -f pnpm-lock.yaml`. If any is missing, stop and tell the user that this is not a pnpm workspace with a committed `pnpm-lock.yaml`.
+   - Run: `pnpm --version`. If it fails, stop and tell the user to install `pnpm`. Do not attempt a fallback installer.
+   - Run: `node --version`. If its major version is lower than the version in `.nvmrc`, stop and tell the user to switch to that Node version (the scripts run `.ts` files with Node's built-in type stripping).
+4. **Confirm the `packages/` directory exists at the repo root.**
+   - Run: `test -d packages`.
+   - If it does not exist, stop and tell the user that a `packages/` directory is required at the repo root.
+5. **Confirm `vitest`, `typescript`, and `eslint` are declared in the root `package.json`.**
+   - Run: `grep -qE '"vitest"[[:space:]]*:' package.json && grep -qE '"typescript"[[:space:]]*:' package.json && grep -qE '"eslint"[[:space:]]*:' package.json`.
+   - Each pattern matches the quoted package name as a dependency key, such as `"vitest": "^5.1.0"`. It does not match a different package whose name only starts or ends the same way, such as `"typescript-eslint"` or `"@vitest/coverage-v8"`.
+   - If any of the three is missing, stop and tell the user which tool(s) are missing and to add them with `pnpm add -D -w vitest typescript eslint`.
 6. **Confirm `worktrees/` is ignored by git.**
    - Run: `git check-ignore -q worktrees/.probe`.
    - If exit code is non-zero (the path is NOT ignored), stop and tell the user to add `worktrees/` to `.gitignore` (committed) or to `.git/info/exclude` (personal-only).
@@ -104,9 +105,9 @@ Follow these steps in order:
     - Run: `mkdir -p worktrees`.
     - Run: `git worktree add -b "$BRANCH" "worktrees/$FOLDER" main`.
     - If this fails, capture the exact git error, run `git worktree prune` to clear any admin debris, and stop and tell the user the captured git error.
-11. **Install Python/uv dependencies inside the new worktree.**
-    - Run: `uv sync --locked --directory "worktrees/$FOLDER"`. The `--locked` flag stops with an error instead of rewriting `uv.lock` when it is missing or out of date.
-    - If `uv sync` fails, capture the error and add it under **Risks / gotchas** in the final report, mark the run as `Status: Partial`, and continue to Step 12.
+11. **Install pnpm dependencies inside the new worktree.**
+    - Run: `pnpm install --frozen-lockfile --dir "worktrees/$FOLDER"`. The `--frozen-lockfile` flag stops with an error instead of rewriting `pnpm-lock.yaml` when it is missing or out of date.
+    - If `pnpm install` fails, capture the error and add it under **Risks / gotchas** in the final report, mark the run as `Status: Partial`, and continue to Step 12.
 12. **Confirm the new worktree is on the correct branch.**
     - Run: `git -C "worktrees/$FOLDER" branch --show-current`.
     - If the output differs from `$BRANCH`, add the mismatch under **Risks / gotchas** in the final report and mark the run as `Status: Partial`.
@@ -115,7 +116,7 @@ Follow these steps in order:
 **Decision discipline**
 
 - Never invent or auto-derive a name; always require it in `$ARGUMENTS` from the user. Never guess the type from the name: it is `feature` unless the user states another.
-- Never silently overwrite an existing worktree folder, branch, or `.venv`.
+- Never silently overwrite an existing worktree folder, branch, or `node_modules`.
 - If a non-fatal step fails after the worktree exists, report Partial and never auto-clean — the user inspects the partial artifact.
 - Refuse-and-report is the default disposition; do not attempt to repair or resume previous partial states.
 
@@ -135,17 +136,17 @@ Return a concise, easy-to-scan summary in plain language at a 16-year-old readin
 
 - **Status**: Success | Partial | Blocked
 - **What you understood**: 1–3 bullets restating the type, name, branch name, and worktree path.
-- **What you did**: bullets, in execution order (e.g. created worktree, created branch, ran `uv sync`, plus the Step 9 freshness outcome verbatim).
+- **What you did**: bullets, in execution order (e.g. created worktree, created branch, ran `pnpm install`, plus the Step 9 freshness outcome verbatim).
 - **Key results**:
   - Worktree path: `worktrees/<folder>`
   - Branch: `<type>/<name>`
   - Base branch: `main`
-  - uv sync: result
-- **Risks / gotchas**: bullets, only when real (e.g. freshness behind or diverged, partial `.venv`, branch mismatch).
-- **Next steps**: exact command `cd worktrees/<folder>` to enter the worktree and start development. If `Status: Partial` because of `uv sync`, also include the exact follow-up command for the user to run.
+  - pnpm install: result
+- **Risks / gotchas**: bullets, only when real (e.g. freshness behind or diverged, partial `node_modules`, branch mismatch).
+- **Next steps**: exact command `cd worktrees/<folder>` to enter the worktree and start development. If `Status: Partial` because of `pnpm install`, also include the exact follow-up command for the user to run.
 - **Questions (only if blocked)**: numbered list of what is needed to unblock.
 
 ## Notes
 
-- Hardcoded assumptions: project uses Python + `uv` with `uv.lock` committed; project source lives under `app/`; `pytest`, `mypy`, and `pyright` are declared as dev dependencies; project has no web server; all worktrees live under `worktrees/` at the repo root.
-- Known limitations: the warn-only fetch in Step 9 always emits an outcome under "What you did" (skipped / up to date / ahead / behind / diverged), but the check itself is best-effort — on network or remote failure it substitutes the git error and proceeds. `pyproject.toml` presence and dev-dependency declarations are checked but the file's contents are not otherwise validated.
+- Hardcoded assumptions: project uses a pnpm workspace with `pnpm-lock.yaml` committed and the Node version in `.nvmrc`; project source lives under `packages/`; `vitest`, `typescript`, and `eslint` are declared as root dev dependencies; ESLint and the root `tsconfig.json` ignore `worktrees/`; project has no web server; all worktrees live under `worktrees/` at the repo root.
+- Known limitations: the warn-only fetch in Step 9 always emits an outcome under "What you did" (skipped / up to date / ahead / behind / diverged), but the check itself is best-effort — on network or remote failure it substitutes the git error and proceeds. `package.json` presence and dev-dependency declarations are checked but the file's contents are not otherwise validated.

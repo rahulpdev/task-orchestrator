@@ -75,6 +75,9 @@ temp/
 .claude/settings.local.json
 CLAUDE.local.md
 
+# --- Git worktrees created by /git:new-worktree ---
+worktrees/
+
 # --- Agent-written reports and notes, kept locally only ---
 .agents/reports/
 .agents/docs/
