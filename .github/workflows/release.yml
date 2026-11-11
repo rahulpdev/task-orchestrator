@@ -1,10 +1,11 @@
 name: Release Obsidian plugin
 
-# Pushing a tag such as 0.2.0 (no leading "v") builds the plugin and creates a draft release
-# with the three files Obsidian installs, each attached and attested on its own.
+# Pushing a tag such as 0.2.0 (no leading "v") starts a release; no other tag does. Lint, format
+# and tests run before the build, which then creates a draft release with the three files
+# Obsidian installs, each attached and attested on its own.
 on:
     push:
-        tags: ['*']
+        tags: ['[0-9]+.[0-9]+.[0-9]+']
 
 jobs:
     release:
@@ -25,6 +26,9 @@ jobs:
             - name: Check the manifest and that the tag matches its version
               run: node scripts/check-manifest.ts --tag "${GITHUB_REF#refs/tags/}"
 
+            - run: pnpm lint
+            - run: pnpm format:check
+            - run: pnpm test
             - run: pnpm build
 
             # One attestation per file: a single attestation covering several files failed
