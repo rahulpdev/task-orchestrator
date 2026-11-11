@@ -1,32 +1,35 @@
+import { defineConfig, globalIgnores } from 'eslint/config';
 import obsidianmd from 'eslint-plugin-obsidianmd';
-import globals from 'globals';
-import { globalIgnores, defineConfig } from 'eslint/config';
+import eslintConfigPrettier from 'eslint-config-prettier/flat';
 
 export default defineConfig(
 	globalIgnores([
-		'node_modules',
-		'dist',
-		'esbuild.config.mjs',
-		'version-bump.mjs',
-		'versions.json',
+		'**/node_modules/',
 		'main.js',
-		'package.json',
-		'package-lock.json',
-		'tsconfig.json',
+		'dist/',
+		'coverage/',
+		'.vitest/',
+		'.wdio-obsidian-cache/',
+		'test-vault/',
+		'.agents/',
+		'.claude/',
+		'.archon/',
+		'worktrees/',
+		'pnpm-lock.yaml',
 	]),
+	...obsidianmd.configs.recommended,
 	{
 		languageOptions: {
-			globals: {
-				...globals.browser,
-			},
 			parserOptions: {
 				projectService: {
-					allowDefaultProject: ['eslint.config.mts', 'manifest.json'],
+					allowDefaultProject: [
+						'packages/plugin/esbuild.config.mjs',
+						'scripts/version-bump.mjs',
+					],
 				},
 				tsconfigRootDir: import.meta.dirname,
-				extraFileExtensions: ['.json'],
 			},
 		},
 	},
-	...obsidianmd.configs.recommended,
+	eslintConfigPrettier,
 );

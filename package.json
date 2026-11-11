@@ -11,12 +11,23 @@
 	"scripts": {
 		"build": "pnpm --filter @task-orchestrator/plugin run build",
 		"dev": "pnpm --filter @task-orchestrator/plugin run dev",
-		"lint": "echo \"lint: configured in Step 2\"",
-		"format:check": "echo \"format: configured in Step 2\"",
+		"lint": "eslint . --max-warnings 0",
+		"format": "prettier --write .",
+		"format:check": "prettier --check .",
 		"typecheck": "echo \"typecheck: configured in Step 3\"",
 		"test": "echo \"test: configured in Step 5\"",
 		"e2e": "echo \"e2e: configured in Step 10\"",
 		"check:manifest": "echo \"check:manifest: configured in Step 11\"",
 		"version": "node scripts/version-bump.mjs && git add manifest.json versions.json"
+	},
+	"devDependencies": {
+		"@types/node": "^26.6.6",
+		"eslint": "^10.14.0",
+		"eslint-config-prettier": "^10.1.8",
+		"eslint-plugin-obsidianmd": "0.5.1",
+		"jiti": "^2.7.0",
+		"prettier": "^3.9.10",
+		"typescript": "^5.9.3",
+		"typescript-eslint": "^8.72.2"
 	}
 }

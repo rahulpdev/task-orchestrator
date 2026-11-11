@@ -1,0 +1,13 @@
+node_modules/
+pnpm-lock.yaml
+main.js
+dist/
+coverage/
+.vitest/
+.wdio-obsidian-cache/
+test-vault/.obsidian/
+.agents/
+.claude/
+.archon/
+docs/plans/
+LICENSE
