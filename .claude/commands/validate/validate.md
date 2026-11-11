@@ -75,7 +75,7 @@ Check the test client against a copy of the fixture vault:
 ```bash
 VAULT_COPY="$(mktemp -d)" && cp -R test-vault/. "$VAULT_COPY"
 node packages/test-client/src/cli.ts "$VAULT_COPY" updateSettings '{"language":"en-US"}' > "$VAULT_COPY.result.json" 2> "$VAULT_COPY.log.jsonl"; echo "exit=$?"
-python3 -I -c "import json,sys; r=json.load(open(sys.argv[1])); lines=[json.loads(l) for l in open(sys.argv[2]) if l.strip()]; assert r['ok'] and lines and all(l.get('correlationId')==r['correlationId'] for l in lines); print('test client ok')" "$VAULT_COPY.result.json" "$VAULT_COPY.log.jsonl"
+node -e "const fs=require('node:fs'); const [resultPath, logPath]=process.argv.slice(1); const result=JSON.parse(fs.readFileSync(resultPath,'utf8')); const lines=fs.readFileSync(logPath,'utf8').split('\n').filter(Boolean).map((line)=>JSON.parse(line)); if (!result.ok || lines.length===0 || !lines.every((line)=>line.correlationId===result.correlationId)) { console.error('test client check failed'); process.exit(1); } console.log('test client ok');" "$VAULT_COPY.result.json" "$VAULT_COPY.log.jsonl"
 ```
 
 **Expected:** `exit=0`, then `test client ok`: the operation succeeded and every log line on standard error carries the `correlationId` of the `Result` on standard output
