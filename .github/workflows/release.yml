@@ -1,52 +1,50 @@
 name: Release Obsidian plugin
 
+# Pushing a tag such as 0.2.0 (no leading "v") builds the plugin and creates a draft release
+# with the three files Obsidian installs, each attached and attested on its own.
 on:
     push:
-        tags:
-            - '*'
+        tags: ['*']
 
 jobs:
-    build:
+    release:
         runs-on: ubuntu-latest
         permissions:
             contents: write
             id-token: write
             attestations: write
         steps:
-            - uses: actions/checkout@v6
-
+            - uses: actions/checkout@v7
             - uses: pnpm/action-setup@v6
-
-            - name: Use Node.js
-              uses: actions/setup-node@v6
+            - uses: actions/setup-node@v7
               with:
                   node-version-file: .nvmrc
                   cache: 'pnpm'
+            - run: pnpm install --frozen-lockfile
 
-            - name: Build plugin
-              run: |
-                  pnpm install --frozen-lockfile
-                  pnpm run build
+            - name: Check the manifest and that the tag matches its version
+              run: node scripts/check-manifest.ts --tag "${GITHUB_REF#refs/tags/}"
 
-            - name: Check for optional styles
-              id: styles
-              run: |
-                  [ -f styles.css ] && echo "exists=true" >> "$GITHUB_OUTPUT" || echo "exists=false" >> "$GITHUB_OUTPUT"
+            - run: pnpm build
 
-            - name: Attest build provenance
+            # One attestation per file: a single attestation covering several files failed
+            # verification in a reported 2026 case.
+            - name: Attest main.js
               uses: actions/attest@v4
               with:
-                  subject-path: |
-                      main.js
-                      ${{ steps.styles.outputs.exists == 'true' && 'styles.css' || '' }}
+                  subject-path: main.js
+            - name: Attest manifest.json
+              uses: actions/attest@v4
+              with:
+                  subject-path: manifest.json
+            - name: Attest styles.css
+              uses: actions/attest@v4
+              with:
+                  subject-path: styles.css
 
-            - name: Create release
+            - name: Create draft release
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               run: |
                   tag="${GITHUB_REF#refs/tags/}"
-
-                  gh release create "$tag" \
-                    --title="$tag" \
-                    --draft \
-                    main.js manifest.json ${{ steps.styles.outputs.exists == 'true' && 'styles.css' || '' }}
+                  gh release create "$tag" --title "$tag" --draft main.js manifest.json styles.css

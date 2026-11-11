@@ -1,0 +1,12 @@
+version: 2
+updates:
+    # Reads pnpm-lock.yaml. obsidian and eslint-plugin-obsidianmd are pinned exactly, so every
+    # bump of either arrives as its own deliberate pull request.
+    - package-ecosystem: npm
+      directory: /
+      schedule:
+          interval: weekly
+    - package-ecosystem: github-actions
+      directory: /
+      schedule:
+          interval: weekly

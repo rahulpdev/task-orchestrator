@@ -1,0 +1,42 @@
+name: CI
+
+on:
+    push:
+    pull_request:
+
+permissions:
+    contents: read
+
+jobs:
+    checks:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v7
+            - uses: pnpm/action-setup@v6
+            - uses: actions/setup-node@v7
+              with:
+                  node-version-file: .nvmrc
+                  cache: 'pnpm'
+            - run: pnpm install --frozen-lockfile
+            - run: pnpm lint
+            - run: pnpm format:check
+            - run: pnpm typecheck
+            - run: pnpm test
+            - run: pnpm build
+            - run: pnpm check:manifest
+            - run: node scripts/check-bundle-size.ts
+            - run: pnpm audit --audit-level=high
+
+    # The same checks the community directory runs: manifest, README, licence, build, and
+    # ESLint with the directory scanner's own eslint-plugin-obsidianmd ruleset.
+    directory-scanner:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v7
+            - uses: pnpm/action-setup@v6
+            - uses: obsidianmd/obsidian-workflows@v1
+              with:
+                  type: plugin
+                  mode: pr
+                  scanner-lint: true
+                  node-version: 26

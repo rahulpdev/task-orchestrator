@@ -17,8 +17,9 @@
 		"typecheck": "pnpm -r run typecheck && tsc --noEmit -p tsconfig.json && tsc --noEmit -p e2e-tests/tsconfig.json",
 		"test": "vitest run",
 		"e2e": "pnpm build && wdio run e2e-tests/wdio.conf.mts",
-		"check:manifest": "echo \"check:manifest: configured in Step 11\"",
-		"version": "node scripts/version-bump.mjs && git add manifest.json versions.json"
+		"check:manifest": "node scripts/check-manifest.ts",
+		"version": "node scripts/version-bump.ts && git add manifest.json versions.json packages/*/package.json",
+		"check:size": "node scripts/check-bundle-size.ts"
 	},
 	"devDependencies": {
 		"@types/mocha": "^10.0.10",
