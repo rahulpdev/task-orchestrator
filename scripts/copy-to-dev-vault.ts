@@ -1,6 +1,6 @@
 /**
- * Copies the built plugin files into the development vault, so Obsidian (with the Hot Reload
- * plugin) picks up each rebuild. Used by `pnpm dev`; copying avoids a symlink from
+ * Copies the built plugin files into the development vault, so Obsidian can load each rebuild.
+ * Used by `pnpm dev`; copying avoids a symlink from
  * `test-vault/` back into the repository, which would make linters and test globs recurse.
  *
  * @packageDocumentation
