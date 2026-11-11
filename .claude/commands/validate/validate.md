@@ -8,7 +8,7 @@ Execute the following commands in sequence and report results:
 pnpm test
 ```
 
-**Expected:** All tests pass (currently 202 tests), coverage report printed, execution time < 10 seconds
+**Expected:** All tests pass with none skipped, coverage report printed with every threshold met, execution time < 10 seconds
 
 ## 2. Type Checking
 
@@ -16,7 +16,7 @@ pnpm test
 pnpm typecheck
 ```
 
-**Expected:** Exit code 0 with no diagnostics from any package (`@task-orchestrator/core`, `@task-orchestrator/plugin`, `@task-orchestrator/test-client`), the root project or `e2e-tests/`
+**Expected:** Exit code 0 with no diagnostics from any package
 
 ## 3. Linting
 

@@ -11,6 +11,8 @@ export default defineConfig({
 			reporter: ['text'],
 			include: ['packages/*/src/**/*.ts'],
 			exclude: ['**/*.test.ts'],
+			// Fails the run when core coverage falls. Raise as coverage grows; never lower to pass.
+			thresholds: { 'packages/core/src/**/*.ts': { lines: 80 } },
 		},
 		projects: [
 			{
