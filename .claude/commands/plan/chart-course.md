@@ -74,6 +74,7 @@ Follow these steps in order:
 5. **Extract only the allowed handoff fields.**
    - Extract the exact `status` value from the Navigator handoff report.
    - Extract the exact `summary` value from the Navigator handoff report.
+   - Extract the exact `document_review.status` value from the Navigator handoff report.
    - Record the exact `subagent_type` or `agent_type` value used in Step 2.
    - Do not include rankings, criteria, close calls, gaps, assumptions, blockers, coverage, next actions, or any other Navigator handoff fields.
 
@@ -85,7 +86,7 @@ Follow these steps in order:
 
 - If you must make assumptions: list them explicitly and keep them minimal.
 - If blocked by missing info: stop and ask targeted questions.
-- If the Navigator response is malformed or lacks `status` or `summary`, report the missing field and stop.
+- If the Navigator response is malformed or lacks `status`, `summary` or `document_review.status`, report the missing field and stop.
 
 **Quality/Safety constraints**
 
@@ -105,6 +106,7 @@ Return only this concise report:
 - **Artifact confirmation**: confirmed `<artifact-path>` exists and is non-empty, or state that confirmation failed.
 - **Sub-agent status**: the exact `status` field from the Navigator handoff report.
 - **Sub-agent summary**: the exact `summary` field from the Navigator handoff report.
+- **Document review**: the exact `document_review.status` field from the Navigator handoff report.
 - **Next**: `Awaiting your explicit instruction before proceeding.`
 
 Do not add any additional sections, rankings, recommendations, or commentary.

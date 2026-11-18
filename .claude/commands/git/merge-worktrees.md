@@ -163,7 +163,7 @@ Follow these steps in order:
 
 ### Human-Readable Report
 
-Return a concise, easy-to-scan summary in plain language at a 16-year-old reading level:
+Return a concise, easy-to-scan summary:
 
 - **Status**: Success | Partial | Blocked
 - **What you understood**: 1–3 bullets restating the type, name, source branch, and merge target.

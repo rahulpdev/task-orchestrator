@@ -1,5 +1,5 @@
 ---
-description: Think through a decision the way a senior software engineer would, assess every option against seven explicit lenses, then return a recommendation with the relevant trade-offs to support the technically-inexperienced project owner's final decision.
+description: Think through a decision the way a senior software engineer would, assess every option against seven explicit lenses, then return a recommendation with the relevant trade-offs to support the user's final decision.
 argument-hint: [guidance] (optional - extra context, constraints, concerns, leanings, confusions, or focus instructions)
 allowed-tools: Read, Glob, Grep, Bash(git:*), Bash(ls:*), Bash(find:*), Bash(cat:*), WebFetch, WebSearch, AskUserQuestion
 ---
@@ -8,7 +8,7 @@ allowed-tools: Read, Glob, Grep, Bash(git:*), Bash(ls:*), Bash(find:*), Bash(cat
 
 ## Philosophy (Why this exists)
 
-In long agent-driven sessions the user (the project owner) is handed technical choices that outrun their experience, and making a decision in the moment risks committing to a black-box "do X". This command is the pause-and-think alternative: it closes the gap by considering the decision the way a senior software engineer would, surfacing the decision-making judgement, and making every assumption visible so the user can keep ownership of the final choice.
+In long agent-driven sessions the user is handed technical choices that outrun their experience, and making a decision in the moment risks committing to a black-box "do X". This command is the pause-and-think alternative: it closes the gap by considering the decision the way a senior software engineer would, surfacing the decision-making judgement, and making every assumption visible so the user can keep ownership of the final choice.
 
 ## Invocation & Arguments (INPUT)
 
@@ -120,7 +120,7 @@ Follow these steps in order:
 
 ### Human-Readable Report (for humans)
 
-Return a single decision brief in the structure below. Use plain language; assume the reader is technically intermediate and may not know every term the AI agent used.
+Return a single decision brief in the structure below.
 
 ```markdown
 # Decision Brief

@@ -1,1 +1,0 @@
-../../../../Workspaces/engineering-toolkit/.agents/reference/writing-standard.md

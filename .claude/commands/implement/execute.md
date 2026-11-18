@@ -97,14 +97,6 @@ Provide summary:
 - Confirm all validations pass
 - Ready for `/commit` command
 
-## Human communication rules
-
-These apply to you, in every update you write to the user during a task and in the final report.
-
-- Never use or coin a metaphor or jargon as the name for something, say what it does instead.
-- Never use em dashes.
-- Never assume familiarity with technical terms, jargon, or acronyms.
-
 ## Notes
 
 - If you encounter issues not addressed in the plan, document them

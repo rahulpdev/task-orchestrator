@@ -366,53 +366,11 @@ npm version patch                                          # Bump the version in
 
 ---
 
-## 10. Human Communication Rules
+## 10. Communication Standard
 
-**PHILOSOPHY**
+If the text of the file named below is not already in your context, read it in full before your first message to the user.
 
-- You may read highly technical materials and perform senior-level engineering work, but communication with the project owner must be calibrated to their role and background.
-- Treat the project owner as:
-    - a nontechnical executive for product, business, delivery, risk, and prioritisation matters
-    - a junior engineer for implementation matters
-    - an intelligent decision-maker who needs clear explanations, not oversimplification
-
-**SCOPE**
-
-- Applies to every reply addressed to the project owner, including progress updates, code explanations, document walkthroughs, answers to questions, and general project conversation.
-- Does **not** apply to the underlying artefacts themselves. Source code, docstrings, reference documents, sub-agent prompts, and commit messages remain appropriately technical.
-- These rules govern how you talk to the project owner about those artefacts.
-
-**GOAL**
-
-- The goal is not to reduce complexity. The goal is to make complexity navigable.
-- Preserve important technical nuance, but explain it in a way the project owner can follow.
-- Act like a senior technical advisor, teacher, and implementation partner to the project owner.
-
-**PRACTICAL RULES**
-
-- Start with the practical meaning before technical detail.
-- Explain why something matters, not only what happened.
-- Omit performative agreement, generic setup, repeated summaries, and adjacent detail that does not improve understanding, decision making, or progress tracking.
-- Use technical terms when useful, but define or contextualise them when they may not be obvious.
-- When citing a document section, briefly explain what that section is for; do not rely on section numbers alone.
-- When explaining code, first describe what it does, what it produces, and where it fits before walking through implementation detail.
-- When comparing options, give the plain-language consequence of each option before technical trade-offs.
-- Prefer concrete examples over abstract architecture language.
-- Do not assume the project owner can infer implications from technical shorthand.
-- Do not dumb things down; make the real issue legible.
-- Calibrate depth to the situation: brief for simple updates, deeper for architecture, risk, scope, learning, or important decisions.
-- When depth is needed, explain in layers: plain-English meaning, project impact, technical mechanism, then trade-offs or edge cases.
-- If the project owner appears confused, frustrated, or uncertain, slow down and reframe before continuing.
-- Avoid meta-commentary such as "honest answer" or "fair criticism"; just state the point clearly.
-
-**FAILURE MODES**
-
-- Too technical: senior-engineer shorthand without explanation.
-- Too simplistic: removing detail the project owner needs to make informed judgments.
-
-**PROJECT OWNER CONTROL**
-
-- Optimise communication for understanding, decision making, progress tracking, and the project owner's ability to intervene and stay in control of the project.
+@.agents/reference/communication-standard.md
 
 ---
 
@@ -429,5 +387,5 @@ npm version patch                                          # Bump the version in
 9. **Never import across feature slices** per Section 3
 10. **Imitate the reference implementations** per Section 8
 11. **Never use git commands:** `git add .`, `git add -A` or `git add --all`. Commit with `/git:commit`, staging files by path, and never stage `.agents/PRD.md` or `.agents/TAD.md` (Section 1)
-12. **Communicate with the project owner** per Section 10
-13. **Ask the project owner before any push to GitHub**, and before deleting anything there, per Section 10
+12. **Communicate with the user** per Section 10
+13. **Ask the user before any push to GitHub**, and before deleting anything there

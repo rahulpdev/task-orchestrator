@@ -111,7 +111,7 @@ Follow these steps in order:
 
 ### Human-Readable Report
 
-Return a concise, easy-to-scan report using precise, plain and simple language:
+Return a concise, easy-to-scan report:
 
 - **Verdict**: Use the exact phrase from Step 9.
 - **Extracted problem definition (as understood)**: 1-3 short sentences, or `No stable problem definition found.`
