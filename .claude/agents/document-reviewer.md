@@ -74,8 +74,8 @@ Follow these steps in order:
 
 **Write exactly one markdown file:**
 
-- **Path**: `.agents/reports/document-reviewer-<YYYY-MM-DD-HHMMSS>-<name of the document's file, without its extension>.md`
-- **Naming rule**: `<YYYY-MM-DD-HHMMSS>` is the date and time of the review. 
+- **Path**: `.agents/reports/document-reviewer-<YYYY-MM-DD>-<name of the document's file, without its extension>.md`
+- **Naming rule**: `<YYYY-MM-DD>` is today's date.
 - **Purpose**: A record of the review that the user can read after the conversation has ended.
 
 **Report template:**
@@ -84,7 +84,7 @@ Follow these steps in order:
 # Document Review
 
 **Agent**: document-reviewer
-**Date**: <date and time of the review>
+**Date**: <YYYY-MM-DD>
 **Scope**: <document path>, reviewed against <standard path>
 
 ## Summary
@@ -140,7 +140,7 @@ findings:
     suggested_wording: "<a replacement, or 'none' where you cannot tell what was meant>"
 
 artifacts:
-  - path: ".agents/reports/document-reviewer-<YYYY-MM-DD-HHMMSS>-<name of the document's file, without its extension>.md"
+  - path: ".agents/reports/document-reviewer-<YYYY-MM-DD>-<name of the document's file, without its extension>.md"
     purpose: "A record of the review"
 
 assumptions: none
