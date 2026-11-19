@@ -27,7 +27,7 @@
 
 **REQUIREMENT ALIGNMENT IS REQUIRED**
 
-- Maintain a three-way match between: stated requirements (PRD, TAD), implementation plan, and final code
+- Maintain a three-way match between: the requirements the implementation plan was written from, the implementation plan, and the final code
 - When a change makes any statement in this file untrue, correct this file in the same change
 
 **TSDOC ON ALL EXPORTED FUNCTIONS**
@@ -37,7 +37,7 @@
 **KISS** (Keep It Simple, Stupid)
 
 - Prefer simple, readable solutions over clever abstractions
-- Commands and scripts use only the tools the tech stack requires; any further tool becomes a declared dependency first
+- Commands and scripts never bring in a second programming language or an undeclared package; general command-line tools such as `git`, `grep` and `curl` are allowed, and a further package becomes a declared dependency first
 
 **YAGNI** (You Aren't Gonna Need It)
 
@@ -111,6 +111,8 @@ scripts/                    # Build checks, version bump, manifest check
 - `shared/` — only code used by **3 or more** feature slices; never feature-specific logic
 - Each feature slice is self-contained; a slice uses only what another slice publishes through its `index.ts`
 - `main.ts` does lifecycle and nothing else
+- A write to a note states the value it expects to replace; where the note holds a different value, that value stays and the write reports the conflict
+- A note is found by the `id` in its front matter, never by its path or file name
 - One plugin bundle (`main.js`) loaded by Obsidian; one command-line test client; the paid service lives in a separate private repository
 
 ---
@@ -135,7 +137,7 @@ Code examples in this file show format only. Their customer and order names are 
 - No enums, parameter properties or namespaces: use string-literal unions and `as const` objects
 - With `exactOptionalPropertyTypes`, leave an optional key out; never assign `undefined` to it
 - Inside `packages/core/`, code, comments and READMEs say "the host application", never the host's name: the boundary check bans the word
-- No other plugin is named anywhere in the repository except `NOTICES.md` (TAD 8.6)
+- No other plugin is named anywhere in the repository except `NOTICES.md`
 
 ### TSDoc (required on all exported functions)
 
@@ -174,7 +176,7 @@ export const CustomerSchema = z.object({
 export type Customer = z.infer<typeof CustomerSchema>;
 ```
 
-> **Vault data exception:** Fields written to a note keep exactly the names the PRD fixes (e.g., `id`, `status`), however short. Variables, properties and types inside the code must always use verbose names. When a schema describes vault data, its keys are the PRD's names and the code maps them to verbose names where it reads them.
+> **Vault data exception:** Fields written to a note keep exactly the names used in the note's front matter (e.g., `id`, `status`), however short. Variables, properties and types inside the code must always use verbose names. When a schema describes vault data, its keys are those names and the code maps them to verbose names where it reads them.
 
 ---
 
@@ -386,6 +388,6 @@ If the text of the file named below is not already in your context, read it in f
 8. **No suppression comments without a documented reason** per Section 1
 9. **Never import across feature slices** per Section 3
 10. **Imitate the reference implementations** per Section 8
-11. **Never use git commands:** `git add .`, `git add -A` or `git add --all`. Commit with `/git:commit`, staging files by path, and never stage `.agents/PRD.md` or `.agents/TAD.md` (Section 1)
+11. **Never use git commands:** `git add .`, `git add -A` or `git add --all`. Commit with `/git:commit`, staging files by path
 12. **Communicate with the user** per Section 10
 13. **Ask the user before any push to GitHub**, and before deleting anything there
