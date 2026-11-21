@@ -15,7 +15,7 @@ Follow these steps in order:
 
 1. **Check invocation and required files.**
    - If the command was invoked with any arguments, stop and ask the user to re-run `/set-heading` with no arguments.
-   - Confirm the following three sources are present and usable: `.agents/PRD.md`, `.agents/TAD.md`, and `.agents/reference/vertical-slice-architecture-setup-guide.md`.
+   - Confirm the following three sources are present and usable: `docs/PRD.md`, `docs/TAD.md`, and `.agents/reference/vertical-slice-architecture-setup-guide.md`.
    - If any of the three is missing, empty, or unreadable, stop and ask for the correct location before proceeding.
 
 2. **Run the recent-work agent.**

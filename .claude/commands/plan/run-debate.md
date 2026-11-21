@@ -14,8 +14,8 @@ A debate workspace must hold a `problem.md` and optional `context/` files in one
 
 **Usage examples**
 
-- `/run-debate /Users/rahulmac/work/auth/problem-definition.md /Users/rahulmac/work/auth/solution.md`
-- `/run-debate /Users/rahulmac/work/auth/problem-definition.md /Users/rahulmac/work/auth/solution.md /Users/rahulmac/work/auth/debate-config.json`
+- `/run-debate /path/to/auth/problem-definition.md /path/to/auth/solution.md`
+- `/run-debate /path/to/auth/problem-definition.md /path/to/auth/solution.md /path/to/auth/debate-config.json`
 
 **Arguments received**
 
@@ -50,22 +50,23 @@ A debate workspace must hold a `problem.md` and optional `context/` files in one
    - Confirm each supplied path is an existing file: run `test -f "$1"`, `test -f "$2"`, and (only if supplied) `test -f "$3"`. If any fails, stop and report.
    - `$1` and `$2` must end in `.md`; `$3` (if supplied) must end in `.json`. If not, stop and report.
    - `$1`, `$2`, and `$3` (if supplied) must share one parent folder (the source folder). Compare `dirname "$1"`, `dirname "$2"`, and `dirname "$3"`. If they differ, stop and report.
+   - The environment variable `DIALECTIC_AGENTIC_DIR` must be set to a clone of the dialectic-agentic repository: run `test -f "$DIALECTIC_AGENTIC_DIR/skills/orchestrate/SKILL.md"`. If it fails, stop and tell the user to set `DIALECTIC_AGENTIC_DIR` to the clone's path.
 2. **Build the debate workspace in the source folder** (the folder containing `$1`).
    - Run: `mkdir -p "$(dirname "$1")/debate/context"`.
    - If `$(dirname "$1")/debate/problem.md` exists and is not a symlink, stop and report; do not overwrite. Otherwise run: `ln -sf "$1" "$(dirname "$1")/debate/problem.md"`.
    - If `$(dirname "$1")/debate/context/$(basename "$2")` exists and is not a symlink, stop and report; do not overwrite. Otherwise run: `ln -sf "$2" "$(dirname "$1")/debate/context/$(basename "$2")"`.
 
 3. **Launch the debate by following the orchestrate skill.**
-   Read `/Users/rahulmac/ExternalRepos/dialectic-agentic/skills/orchestrate/SKILL.md` and follow it exactly with:
+   Read `$DIALECTIC_AGENTIC_DIR/skills/orchestrate/SKILL.md` and follow it exactly with:
    - `WORKSPACE` = `$(dirname "$1")/debate`
-   - `PROJECT` = `/Users/rahulmac/ExternalRepos/dialectic-agentic`
+   - `PROJECT` = `$DIALECTIC_AGENTIC_DIR`
    - `DEBATE_CONFIG` = `$3`, only if `$3` was supplied; otherwise omit.
 
 4. **Report the outcome** using the Output section below.
 
 **Decision discipline**
 
-- Do not invent a `WORKSPACE`, `PROJECT`, or `DEBATE_CONFIG` value. Derive `WORKSPACE` from `$1`'s folder, use the hardcoded `PROJECT`, and pass `DEBATE_CONFIG` only when `$3` is supplied.
+- Do not invent a `WORKSPACE`, `PROJECT`, or `DEBATE_CONFIG` value. Derive `WORKSPACE` from `$1`'s folder, take `PROJECT` from `DIALECTIC_AGENTIC_DIR`, and pass `DEBATE_CONFIG` only when `$3` is supplied.
 - If Step 1 fails validation, stop and ask the user to fix the paths — do not build the workspace.
 
 **Quality/Safety constraints**
@@ -88,6 +89,6 @@ A debate workspace must hold a `problem.md` and optional `context/` files in one
 
 ## Notes (Optional)
 
-- `PROJECT` is hardcoded to `/Users/rahulmac/ExternalRepos/dialectic-agentic`. If the clone moves, update the SKILL.md path and `PROJECT` value in Step 3.
+- `PROJECT` is read from the environment variable `DIALECTIC_AGENTIC_DIR`, which must point at a clone of the dialectic-agentic repository. Set it in the shell before invoking the command.
 - The optional `debate-config.json` is passed as `DEBATE_CONFIG=` (highest-precedence config), not copied into the workspace, so the workspace stays free of the JSON and the original file is referenced in place.
 - `allowed-tools` is intentionally broad (`Task`, `Write`, `Edit`, `WebSearch`) because following the orchestrate skill runs a full multi-agent debate that dispatches subagents, writes round/synthesis files, and lets agents search the web — the wrapper's own setup only needs `Bash`.

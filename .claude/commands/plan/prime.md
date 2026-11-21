@@ -40,8 +40,8 @@ Uncommitted changes:
 
 Read these documents in full, where they exist:
 
-- @.agents/PRD.md, the PRD (product requirements document)
-- @.agents/TAD.md, the TAD (technical architecture document)
+- @docs/PRD.md, the PRD (product requirements document)
+- @docs/TAD.md, the TAD (technical architecture document)
 - `README.md` at the project root
 
 If the PRD or the TAD is not at that path, look for the project's requirements and architecture documents under another name, starting from the root `README.md`. Record under **Missing evidence** any you could not find.
@@ -54,7 +54,7 @@ If the PRD or the TAD is not at that path, look for the project's requirements a
 
 Never open a file that holds secrets, such as `.env`. An example file, such as `.env.example`, is safe to read.
 
-**Skip `.claude/` folder and all `.agents/` subfolders (except `.agents/examples`)**.
+**Skip `.claude/` folder, all `.agents/` subfolders (except `.agents/examples`), and the `docs/options/` and `docs/reviews/` folders**.
 
 ### 4. Map Current Implementation State
 

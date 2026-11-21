@@ -66,7 +66,7 @@ So that <benefit/value>
 
 - Catalog external libraries relevant to feature
 - Understand how libraries are integrated (check imports, configs)
-- Find relevant documentation in docs/, ai_docs/, .agents/reference or ai-wiki if available
+- Find relevant documentation in docs/, ai_docs/, .agents/reference or ai-wiki if available, skipping `docs/options/` and `docs/reviews/`
 - Note library versions and compatibility requirements
 
 **4. Testing Patterns**

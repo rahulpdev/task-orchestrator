@@ -78,11 +78,10 @@ CLAUDE.local.md
 # --- Git worktrees created by /git:new-worktree ---
 worktrees/
 
-# --- Agent-written reports and notes, kept locally only ---
-.agents/reports/
-.agents/docs/
-docs/reports/
+# --- Agent-written planning options and reviews, kept locally only ---
+docs/options/
+docs/reviews/
 
 # --- Planning documents kept out of the public repository ---
-.agents/PRD.md
-.agents/TAD.md
+docs/PRD.md
+docs/TAD.md

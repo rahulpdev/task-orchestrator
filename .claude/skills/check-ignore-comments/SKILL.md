@@ -8,7 +8,7 @@ agent: general-purpose
 
 Find all noqa/type:ignore comments in the codebase, investigate why they exist, and provide recommendations for resolution or justification.
 
-Create a markdown report file (create the reports directory if not created yet): `.agents/reports/ignore-comments-report-{YYYY-MM-DD}.md`
+Create a markdown report file (create the `docs/reviews/` directory if not created yet): `docs/reviews/ignore-comments-report-{YYYY-MM-DD}.md`
 
 For each ignore comment found, include in the report:
 

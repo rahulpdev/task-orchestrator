@@ -1,5 +1,5 @@
 ---
-description: Save the previous AI response verbatim to a markdown file, writing to `docs/plans/artifacts/<slug>/<slug>-problem-definition.md` using a supplied or inferred kebab-case slug.
+description: Save the previous AI response verbatim to a markdown file, writing to `docs/options/<slug>-problem-definition.md` using a supplied or inferred kebab-case slug.
 argument-hint: [slug] (optional - kebab-case slug for the feature/bug; inferred from the previous response if omitted)
 allowed-tools: Read, Write, Bash(mkdir:*), Bash(test:*), AskUserQuestion
 ---
@@ -8,7 +8,7 @@ allowed-tools: Read, Write, Bash(mkdir:*), Bash(test:*), AskUserQuestion
 
 ## Philosophy (Why this exists)
 
-This command anchors a planning cycle by capturing the problem definition as a standalone artifact so that downstream chain commands can derive every subsequent artifact's location and name from this single anchor. Fidelity matters more than summarisation, formatting cleanup, or convenience: the saved file must contain the previous AI response exactly as it appeared to the user. Fidelity only serves the chain when the response is a complete definition, so the sections downstream commands read are confirmed present before anything is written. The destination folder is derived from the slug, and the folder name becomes the canonical source of truth for the rest of the chain.
+This command anchors a planning cycle by capturing the problem definition as a standalone artifact so that downstream chain commands can derive every subsequent artifact's location and name from this single anchor. Fidelity matters more than summarisation, formatting cleanup, or convenience: the saved file must contain the previous AI response exactly as it appeared to the user. Fidelity only serves the chain when the response is a complete definition, so the sections downstream commands read are confirmed present before anything is written. The filename is derived from the slug, and the filename becomes the canonical source of truth for the rest of the chain.
 
 ## Invocation & Arguments (INPUT)
 
@@ -73,8 +73,8 @@ Follow these steps in order:
    - If normalisation produces an empty slug, stop and ask the user to supply one.
 
 4. **Prepare the target folder and file path.**
-   - Compute the target folder: `docs/plans/artifacts/<slug>/`.
-   - Compute the target file: `<target-folder>/<slug>-problem-definition.md`.
+   - The target folder is `docs/options/`.
+   - Compute the target file: `docs/options/<slug>-problem-definition.md`.
    - Use `test -e <target-folder>` to check whether the target folder exists.
    - If the target folder does not exist, create it with `mkdir -p`.
    - Use `test -e <target-file>` to check whether the target file exists.
@@ -106,7 +106,7 @@ Follow these steps in order:
 - The markdown file must contain the previous AI response verbatim and nothing else.
 - Do not save a response that lacks any section named in Step 1.
 - Do not overwrite an existing file without explicit user confirmation.
-- Do not save the file outside `docs/plans/artifacts/<slug>/`.
+- Do not save the file outside `docs/options/`.
 - Do not use a timestamp, random suffix, or generated ID in the slug unless the user explicitly provided one.
 - Do not claim success unless the saved file passes exact readback verification.
 - Do not include the saved response body in the command output.
@@ -126,5 +126,5 @@ Return a concise, easy-to-scan summary:
 
 ## Notes
 
-- This command is the anchor step of the planning chain. The folder it creates is the single source of truth for the slug; downstream chain commands derive their output paths and filenames from `dirname(<problem-definition-path>)` and `basename(dirname(<problem-definition-path>))`.
+- This command is the anchor step of the planning chain. The filename it writes is the single source of truth for the slug; downstream chain commands write next to the problem definition, in `dirname(<problem-definition-path>)`, and take the slug from its filename by removing the `-problem-definition.md` ending.
 - This command preserves the last AI response verbatim; it is not a summariser and does not extract lessons.

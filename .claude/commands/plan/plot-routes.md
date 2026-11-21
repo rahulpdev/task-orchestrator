@@ -16,8 +16,8 @@ The definition file is the only channel through which constraints reach the sub-
 
 **Usage examples**
 
-- `/plot-routes docs/plans/artifacts/auth-redesign/auth-redesign-problem-definition.md`
-- `/plot-routes docs/plans/artifacts/<slug>/<slug>-problem-definition.md`
+- `/plot-routes docs/options/auth-redesign-problem-definition.md`
+- `/plot-routes docs/options/<slug>-problem-definition.md`
 
 **Arguments received**
 
@@ -67,7 +67,7 @@ Follow these steps in order:
 
 3. **Save each sub-agent's YAML report to disk.**
    - Derive the output directory from `$ARGUMENTS`: `dir = dirname($ARGUMENTS)`. The folder must already exist; if it does not exist, stop and report.
-   - Derive the slug from the folder name: `slug = basename($dir)`. The folder name is the canonical source of truth for the slug.
+   - Derive the slug from the problem definition's filename: `slug = basename($ARGUMENTS)` with the `-problem-definition.md` ending removed. The filename is the canonical source of truth for the slug. If the filename does not end in `-problem-definition.md`, stop and report.
    - For each sub-agent response, numbered in the order received (1 to N):
      - Extract the YAML report block from the sub-agent's response.
      - Write it to `$dir/<slug>-option-<i>.yaml` where `<i>` is the sub-agent's sequential number.

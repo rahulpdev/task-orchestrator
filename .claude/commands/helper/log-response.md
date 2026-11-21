@@ -1,5 +1,5 @@
 ---
-description: Append a concise log entry for the previous AI response to `.agents/reports/response-log.md` with required metadata fields.
+description: Append a concise log entry for the previous AI response to `docs/backlog/response-log.md` with required metadata fields.
 argument-hint: (This command must be invoked with no arguments)
 allowed-tools: Read, Edit, Write, Bash(date:*), Bash(mkdir:*), Bash(test:*), AskUserQuestion
 ---
@@ -49,9 +49,9 @@ Follow these steps in order:
    - If the previous AI response is not available verbatim in the conversation, stop and ask the user to paste the response to be logged.
 
 3. **Prepare the fixed log file.**
-   - Use exactly `.agents/reports/response-log.md` as the target file.
-   - Run `mkdir -p .agents/reports`.
-   - Use `test -e .agents/reports/response-log.md` to check whether the target file exists.
+   - Use exactly `docs/backlog/response-log.md` as the target file.
+   - Run `mkdir -p docs/backlog`.
+   - Use `test -e docs/backlog/response-log.md` to check whether the target file exists.
    - If the target file does not exist, create it.
    - Do not overwrite or truncate the target file.
 
@@ -94,11 +94,11 @@ Follow these steps in order:
 - Preserve code, commands, paths, filenames, and exact quoted text when changing them would alter the meaning.
 
 6. **Append the log entry.**
-   - Add the prepared log entry to the end of `.agents/reports/response-log.md`.
+   - Add the prepared log entry to the end of `docs/backlog/response-log.md`.
    - If the target file already contains content, separate the new log entry from the previous content with one blank line.
 
 7. **Verify the append.**
-   - Read `.agents/reports/response-log.md` back.
+   - Read `docs/backlog/response-log.md` back.
    - Confirm the new log entry appears at the end of the file.
    - Confirm the new log entry contains exactly one H2 heading and the fields `datetime`, `agent`, `breadcrumbs`, and `response` in that order.
    - Confirm the `response` field is not empty.
@@ -116,7 +116,7 @@ Follow these steps in order:
 **Quality/Safety constraints**
 
 - Do not accept arguments.
-- Do not write to any response log path other than `.agents/reports/response-log.md`.
+- Do not write to any response log path other than `docs/backlog/response-log.md`.
 - Do not overwrite or truncate existing log content.
 - Do not include hidden reasoning, tool calls, or tool output in the logged response.
 - Do not include the logged response body in the command output.
@@ -130,7 +130,7 @@ Follow these steps in order:
 Return a concise, easy-to-scan summary:
 
 - **Status**: `Success` | `Blocked`
-- **Artifact**: `.agents/reports/response-log.md`
+- **Artifact**: `docs/backlog/response-log.md`
 - **Heading**: `<response title>`
 - **Breadcrumbs**: `<breadcrumbs>`
 - **Questions (omit if success)**:

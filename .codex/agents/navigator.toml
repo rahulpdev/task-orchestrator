@@ -120,7 +120,7 @@ When the differences between options are only marginal — when options address 
 
 **Write exactly one markdown file:**
 
-- **Path**: `<dir>/<slug>-options-evaluation-<YYYYMMDD-HHmmss>.md`, where `<dir>` is the directory containing the problem-definition file (`dirname(problem_definition_path)`) and `<slug>` is the basename of that directory (`basename(dirname(problem_definition_path))`). The folder name is the canonical source of truth for the slug.
+- **Path**: `<dir>/<slug>-options-evaluation-<YYYYMMDD-HHmmss>.md`, where `<dir>` is the directory containing the problem-definition file (`dirname(problem_definition_path)`) and `<slug>` is the problem-definition filename with its `-problem-definition.md` ending removed (`basename(problem_definition_path)` minus that ending). The filename is the canonical source of truth for the slug.
 - **Naming rule**: kebab-case, include ISO datetime
 - **Purpose**: Complete ranked evaluation of all solution options, consumable by the user and primary agent for decision-making
 

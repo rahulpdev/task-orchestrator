@@ -68,7 +68,7 @@ Follow these steps in order:
 
 **Write exactly one markdown file:**
 
-- **Path**: `.agents/reports/document-reviewer-<YYYY-MM-DD>-<name of the document's file, without its extension>.md`
+- **Path**: `docs/reviews/document-reviewer-<YYYY-MM-DD>-<name of the document's file, without its extension>.md`
 - **Naming rule**: `<YYYY-MM-DD>` is today's date.
 - **Purpose**: A record of the review that the user can read after the conversation has ended.
 
@@ -134,7 +134,7 @@ findings:
     suggested_wording: "<a replacement, or 'none' where you cannot tell what was meant>"
 
 artifacts:
-  - path: ".agents/reports/document-reviewer-<YYYY-MM-DD>-<name of the document's file, without its extension>.md"
+  - path: "docs/reviews/document-reviewer-<YYYY-MM-DD>-<name of the document's file, without its extension>.md"
     purpose: "A record of the review"
 
 assumptions: none
