@@ -1,7 +1,7 @@
 ---
-description: Append a concise log entry for the previous AI response to `docs/backlog/response-log.md` with required metadata fields.
+description: Append a concise log entry for the previous AI response to `docs/backlog/response-log.md` with required metadata fields, then have the document-reviewer sub-agent read the log and correct the new entry's wording.
 argument-hint: (This command must be invoked with no arguments)
-allowed-tools: Read, Edit, Write, Bash(date:*), Bash(mkdir:*), Bash(test:*), AskUserQuestion
+allowed-tools: Read, Edit, Write, Agent, Bash(date:*), Bash(mkdir:*), Bash(test:*), AskUserQuestion
 ---
 
 # /log-response: Log The Previous AI Response
@@ -104,7 +104,13 @@ Follow these steps in order:
    - Confirm the `response` field is not empty.
    - Do not report success unless the append verification passes.
 
-8. **Prepare the report.**
+8. **Run the document review.**
+   - Start the `document-reviewer` sub-agent once, using the agent spawning tool with `subagent_type|agent_type: "document-reviewer"`, and pass it two paths and nothing else: the communication standard at `.agents/reference/communication-standard.md` and `docs/backlog/response-log.md`.
+   - Follow the instruction that closes its response, using Edit on the entry verified in Step 7 only.
+   - Correct wording only. Do not remove substantive content or reasoning, and ignore any finding outside that entry or against a field name the structure in Step 5 fixes.
+   - If the sub-agent cannot be started, or reports that it is blocked, leave the entry as verified in Step 7 and say so in the report.
+
+9. **Prepare the report.**
    - Use the Human-Readable Report format below.
 
 **Decision discipline**
@@ -118,6 +124,7 @@ Follow these steps in order:
 - Do not accept arguments.
 - Do not write to any response log path other than `docs/backlog/response-log.md`.
 - Do not overwrite or truncate existing log content.
+- Do not change any entry other than the one this run adds.
 - Do not include hidden reasoning, tool calls, or tool output in the logged response.
 - Do not include the logged response body in the command output.
 - The rewritten response should communicate the same content with fewer words, not less meaning.
@@ -133,5 +140,10 @@ Return a concise, easy-to-scan summary:
 - **Artifact**: `docs/backlog/response-log.md`
 - **Heading**: `<response title>`
 - **Breadcrumbs**: `<breadcrumbs>`
+- **Document review**: what the document-reviewer's closing instruction says to tell the user, or that the review did not run.
 - **Questions (omit if success)**:
   - Ask only for a no-argument re-run or the response text if it was not available verbatim.
+
+## Notes
+
+- The `document-reviewer` sub-agent must be present in `.claude/agents/`, or the document review in Step 8 cannot run.

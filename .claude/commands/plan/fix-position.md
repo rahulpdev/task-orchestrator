@@ -1,14 +1,14 @@
 ---
-description: Save the previous AI response verbatim to a markdown file, writing to `docs/options/<slug>-problem-definition.md` using a supplied or inferred kebab-case slug.
+description: Save the previous AI response verbatim to a markdown file, writing to `docs/options/<slug>-problem-definition.md` using a supplied or inferred kebab-case slug, then have the document-reviewer sub-agent read the saved file and correct its wording.
 argument-hint: [slug] (optional - kebab-case slug for the feature/bug; inferred from the previous response if omitted)
-allowed-tools: Read, Write, Bash(mkdir:*), Bash(test:*), AskUserQuestion
+allowed-tools: Read, Write, Edit, Agent, Bash(mkdir:*), Bash(test:*), AskUserQuestion
 ---
 
 # /fix-position: Save The Problem Definition
 
 ## Philosophy (Why this exists)
 
-This command anchors a planning cycle by capturing the problem definition as a standalone artifact so that downstream chain commands can derive every subsequent artifact's location and name from this single anchor. Fidelity matters more than summarisation, formatting cleanup, or convenience: the saved file must contain the previous AI response exactly as it appeared to the user. Fidelity only serves the chain when the response is a complete definition, so the sections downstream commands read are confirmed present before anything is written. The filename is derived from the slug, and the filename becomes the canonical source of truth for the rest of the chain.
+This command anchors a planning cycle by capturing the problem definition as a standalone artifact so that downstream chain commands can derive every subsequent artifact's location and name from this single anchor. Fidelity comes first: the file is saved as the previous AI response exactly as it appeared to the user, so that nothing from an earlier response in the conversation finds its way in. Fidelity only serves the chain when the response is a complete definition, so the sections downstream commands read are confirmed present before anything is written. Readability comes second: once the saved file matches the response, the `document-reviewer` sub-agent reads it as someone who has not seen the conversation, and its findings correct the wording while the content stays what the response said. The filename is derived from the slug, and the filename becomes the canonical source of truth for the rest of the chain.
 
 ## Invocation & Arguments (INPUT)
 
@@ -92,7 +92,14 @@ Follow these steps in order:
    - If any mismatch exists, rewrite the file once using the same exact source response and read it back again.
    - Do not report success unless the readback content exactly matches the source response.
 
-7. **Prepare the report.**
+7. **Run the document review.**
+   - Start the `document-reviewer` sub-agent once, using the agent spawning tool with `subagent_type|agent_type: "document-reviewer"`, and pass it two paths and nothing else: the communication standard at `.agents/reference/communication-standard.md` and the file verified in Step 6.
+   - Follow the instruction that closes its response, using Edit on the saved file only.
+   - Correct wording only. Do not add, remove or change a decision, a constraint, a scope item, a reference file or a completion condition, and ignore any finding against a section name listed in Step 1.
+   - Take the words for a correction from the source response. Where a correction would need content from anywhere else in the conversation, leave the finding.
+   - If the sub-agent cannot be started, or reports that it is blocked, leave the file as verified in Step 6 and say so in the report.
+
+8. **Prepare the report.**
    - Use the Human-Readable Report format below.
 
 **Decision discipline**
@@ -103,7 +110,8 @@ Follow these steps in order:
 
 **Quality/Safety constraints**
 
-- The markdown file must contain the previous AI response verbatim and nothing else.
+- Until the readback in Step 6 passes, the markdown file must contain the previous AI response verbatim and nothing else.
+- After the readback passes, change the file only through the document review in Step 7.
 - Do not save a response that lacks any section named in Step 1.
 - Do not overwrite an existing file without explicit user confirmation.
 - Do not save the file outside `docs/options/`.
@@ -121,10 +129,12 @@ Return a concise, easy-to-scan summary:
 - **Slug**: the normalised kebab-case slug that was used.
 - **Artifact**: `<actual target file path>`
 - **Validation**: `Readback matched the previous AI response character-for-character.`
+- **Document review**: what the document-reviewer's closing instruction says to tell the user, or that the review did not run.
 - **Questions (omit if success)**:
   - Ask only for a valid slug, overwrite permission, a re-issued definition when a section is missing, or the response text if it was not available verbatim.
 
 ## Notes
 
 - This command is the anchor step of the planning chain. The filename it writes is the single source of truth for the slug; downstream chain commands write next to the problem definition, in `dirname(<problem-definition-path>)`, and take the slug from its filename by removing the `-problem-definition.md` ending.
-- This command preserves the last AI response verbatim; it is not a summariser and does not extract lessons.
+- This command saves the last AI response and nothing from earlier in the conversation; it is not a summariser and does not extract lessons.
+- The `document-reviewer` sub-agent must be present in `.claude/agents/`, or the document review in Step 7 cannot run.
