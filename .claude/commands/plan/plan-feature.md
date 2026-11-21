@@ -386,6 +386,7 @@ Execute every command to ensure zero regressions and 100% feature correctness.
 
 - Replace `{kebab-case-descriptive-name}` with short, descriptive feature name
 - Examples: `add-user-authentication.md`, `implement-search-api.md`, `refactor-database-layer.md`
+- When the feature description names a file in `docs/options/`, name the plan `docs/plans/<slug>-plan.md` instead. Take `<slug>` from the start of that file's name: the part before `-problem-definition.md`, `-heading.md`, `-option-<i>.yaml` or `-options-evaluation-<timestamp>.md`.
 
 **Directory**: Create `docs/plans/` if it doesn't exist
 

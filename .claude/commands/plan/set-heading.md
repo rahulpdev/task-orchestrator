@@ -1,6 +1,6 @@
 ---
-description: Infer the active prioritisation lens from the PRD, TAD, vertical-slice architecture guidance, and recent feat/fix commits, then recommend the next feature build and one alternate with the decision frame fully disclosed.
-allowed-tools: Agent, Bash(test:*), Bash(git log:*), AskUserQuestion
+description: Infer the active prioritisation lens from the PRD, TAD, vertical-slice architecture guidance, and recent feat/fix commits, then recommend the next feature build and one alternate with the decision frame fully disclosed, save the report, and have the document-reviewer sub-agent read the saved report and correct its wording.
+allowed-tools: Read, Write, Edit, Agent, Bash(test:*), Bash(mkdir:*), Bash(date:*), Bash(git log:*), AskUserQuestion
 ---
 
 # /set-heading: Set The Feature Heading
@@ -82,6 +82,21 @@ Follow these steps in order:
    - State uncertainty directly.
    - Do not ask for confirmation before presenting the recommendations.
 
+8. **Save the report.**
+   - Make a concise kebab-case slug, of three words where three are clear, from the name of the primary feature recommended in Step 6.
+   - Write the report from Step 7 to `docs/options/<slug>-heading.md`, taking the time for its title from `date '+%Y-%m-%d %H:%M:%S'` and creating the `docs/options/` folder if it does not exist. If the file already exists, stop and ask before overwriting it.
+
+9. **Run the document review.**
+   - Start the `document-reviewer` sub-agent once, using the agent spawning tool with `subagent_type|agent_type: "document-reviewer"`, and pass it two paths and nothing else: the communication standard at `.agents/reference/communication-standard.md` and the file written in Step 8.
+   - Follow the instruction that closes its response, using Edit on the saved file only.
+   - Correct wording only. Do not change which feature is the primary or the alternate, a selected dimension, a confidence level, an acceptance criterion or a done standard, and ignore any finding against a field name the report format fixes.
+   - If the sub-agent cannot be started, or reports that it is blocked, leave the file as written in Step 8 and say so in the summary.
+
+10. **Return a concise summary.**
+    - Report the path of the saved report on its own line.
+    - State the slug used, then give this reminder: `The slug is yours to choose. Pass the slug you want to /plan:fix-position when you save the problem definition, or it will choose one for you. Rename this report to match if the two differ.`
+    - Report what the document-reviewer's closing instruction says to tell the user, or that the review did not run.
+
 **Decision discipline**
 
 - If you must make assumptions: list them explicitly and keep them minimal.
@@ -93,7 +108,8 @@ Follow these steps in order:
 **Quality/Safety constraints**
 
 - Do not implement the feature.
-- Do not edit, create, stage, or commit files.
+- Do not edit or create any file other than the report file.
+- Stage nothing and commit nothing.
 - Do not produce an implementation plan or task execution checklist.
 - Do not mention invocation prerequisites or prior commands.
 - Do not invent PRD/TAD evidence; distinguish evidence from interpretation.
@@ -103,8 +119,9 @@ Follow these steps in order:
 
 ### Human-Readable Report (for humans)
 
-Return a concise, easy-to-scan summary:
+Write a concise, easy-to-scan summary to the report file:
 
+- **Title**: a first-level heading, `# Feature Heading: <primary feature name>`, then the date and time.
 - **Status**: `Success` | `Blocked`
 - **Recent feat/fix pattern**:
   - List the commit hashes and subjects used for analysis.
@@ -133,3 +150,7 @@ Return a concise, easy-to-scan summary:
   - State any plausible alternate decision frame and how the recommendation would change if that frame were actually most important.
 - **Open questions**:
   - Include only questions that materially affect the user's decision.
+
+## Notes
+
+- The `document-reviewer` sub-agent must be present in `.claude/agents/`, or the document review in Step 9 cannot run.

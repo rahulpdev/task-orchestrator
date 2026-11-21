@@ -1,7 +1,7 @@
 ---
-description: Load the project's documents and code into context, then report the project's current state, before planning or implementation
+description: Load the project's documents and code into context before planning or implementation, save a report of the project's current state, then have the document-reviewer sub-agent read the report and correct its wording
 argument-hint: "[feature focus] (optional - a feature to study closely)"
-allowed-tools: Read, Glob, Grep, Bash(git ls-files:*), Bash(git log:*), Bash(git status:*), Bash(tree:*), Bash(find:*), Bash(ls:*)
+allowed-tools: Read, Write, Edit, Glob, Grep, Agent, Bash(mkdir:*), Bash(date:*), Bash(git ls-files:*), Bash(git log:*), Bash(git status:*), Bash(tree:*), Bash(find:*), Bash(ls:*)
 ---
 
 # Prime: Load Codebase Context
@@ -89,14 +89,25 @@ If a specific feature was provided in `$ARGUMENTS`, deep-dive into:
 - The TAD section (component design, data model, interface contracts)
 - Any existing code that the feature depends on or interacts with
 
+### 7. Save the Report
+
+Write the report, in the Output Report format below, to `docs/reviews/prime-<YYYY-MM-DD-HHMMSS>.md`. Take the time from `date '+%Y-%m-%d-%H%M%S'`, and create the `docs/reviews/` folder if it does not exist.
+
+### 8. Run the Document Review
+
+Start the `document-reviewer` sub-agent once and pass it two paths and nothing else: the communication standard at `.agents/reference/communication-standard.md` and the report saved in step 7. Follow the instruction that closes its response, using Edit on the report file only.
+
+Correct wording only. Do not change a status, an **Observed**, **Inferred** or **Unknown** label, or a fact, and ignore any finding against a heading or field name the Output Report format fixes. If the sub-agent cannot be started, or reports that it is blocked, leave the report as saved and say so.
+
 ## Output Report
 
-Produce a concise summary covering:
+Save a concise summary covering the headings below. Then return only the path to the saved file and what the document-reviewer's closing instruction says to tell the user, or that the review did not run. Do not repeat the report.
 
 ### Project Context
 
 **Project:** [name, from the root `README.md` or the configuration files]
 **Purpose:** [1-sentence summary]
+**Reported:** [date and time of this report]
 
 ### Current Development State
 
