@@ -1,8 +1,15 @@
-Run comprehensive validation of the project to ensure all tests, type checks, linting, builds, and real-Obsidian tests are working correctly.
+Run comprehensive validation of the project to ensure every check the project defines is passing.
 
-Execute the following commands in sequence and report results:
+Execute the checks in the **Checks** section in sequence and report results:
 
-## 1. Test Suite
+- Run each command exactly as written and compare its output with the **Expected** result beneath it.
+- A check passes only when every test passes with none skipped and every tool reports zero errors and zero warnings, whatever its expected result says.
+- Stop anything a check starts, such as a server or a container, before the next check begins, whether or not the check passed.
+- If the Checks section holds no checks, run every validation command the project defines instead: its tests, type checks, linting, formatting, build and any other check, as its `package.json` scripts, `pyproject.toml` tool configuration or Makefile define them.
+
+## Checks
+
+### 1. Test Suite
 
 ```bash
 pnpm test
@@ -10,7 +17,7 @@ pnpm test
 
 **Expected:** All tests pass with none skipped, coverage report printed with every threshold met, execution time < 10 seconds
 
-## 2. Type Checking
+### 2. Type Checking
 
 ```bash
 pnpm typecheck
@@ -18,13 +25,13 @@ pnpm typecheck
 
 **Expected:** Exit code 0 with no diagnostics from any package
 
-## 3. Linting
+### 3. Linting
 
 ```bash
 pnpm lint
 ```
 
-**Expected:** Zero errors, no new warnings, core boundary check passes
+**Expected:** Zero errors, zero warnings, core boundary check passes
 
 ```bash
 pnpm format:check
@@ -32,7 +39,7 @@ pnpm format:check
 
 **Expected:** "All matched files use Prettier code style!"
 
-## 4. Local Build Validation
+### 4. Local Build Validation
 
 Build the plugin:
 
@@ -80,7 +87,7 @@ node -e "const fs=require('node:fs'); const [resultPath, logPath]=process.argv.s
 
 **Expected:** `exit=0`, then `test client ok`: the operation succeeded and every log line on standard error carries the `correlationId` of the `Result` on standard output
 
-## 5. Real-Obsidian Validation
+### 5. Real-Obsidian Validation
 
 Run the tests inside a real Obsidian:
 
@@ -90,15 +97,12 @@ pnpm e2e
 
 **Expected:** All tests pass against both the `earliest` and `latest` Obsidian versions
 
-## 6. Summary Report
+## Summary Report
 
 After all validations complete, provide a summary report with:
 
-- Total tests passed/failed
-- Type checking status
-- Linting status (eslint + prettier)
-- Local build status (bundle, size budget, manifest)
-- Real-Obsidian test status
+- The status of each check, with tests passed/failed where the check runs tests
+- The commands run and where they came from, when the Checks section held none
 - Any errors or warnings encountered
 - Overall health assessment (PASS/FAIL)
 
