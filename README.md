@@ -655,7 +655,7 @@ Not built yet: its payload and outcome are defined when Feature 4 is built.
 
 #### `newSprint` (version 1) — Create a Sprint
 
-Creates a planned Sprint with an end date on a working day, holding every task whose date qualifies it.
+Creates a Sprint note at status `to do` with an end date on a working day, and links every task whose date qualifies it.
 
 ```json
 {
@@ -685,7 +685,7 @@ Not built yet: its payload and outcome are defined when Feature 5 is built.
 
 #### `startSprint` (version 1) — Start the Sprint
 
-Makes the planned Sprint active and sets its start date to that day.
+Moves the Sprint to status `in progress` and sets its start date to that day.
 
 ```json
 {
@@ -1008,7 +1008,7 @@ Not built yet: its payload and outcome are defined when Feature 9 is built.
 
 #### `exportVault` (version 1) — Export the vault
 
-Copies every managed note and the local store into a folder you choose, without the licence key.
+Copies every managed note, the local store and your settings into a folder you choose, without the licence key.
 
 ```json
 {
@@ -1194,14 +1194,14 @@ Every captured item moves through three triage stages. Changing a controlled ite
 
 Status values depend on the note's type. Organise sets the first value when an item reaches `controlled`. Area, person, system and unclassified notes have no status value, so their status field is present and empty. Any value outside these lists is not valid. The application refuses it, and a value typed directly into a note is put back to the previous one.
 
-A Sprint moves through three states. Only one Sprint can be planned or active at a time.
+A Sprint is a note, and its status takes the same three values as a task's. Creating a Sprint sets `to do`, starting it sets `in progress` and ending it sets `done`. Only one Sprint can be `to do` or `in progress` at a time.
 
 ```
 Triage stage (every captured item)
   captured → clarified → controlled
   controlled → clarified            (when the item's type changes)
 
-Status: task, project and goal
+Status: task, project, goal and Sprint
   to do → in progress → done
 
 Status: idea and resource
@@ -1212,9 +1212,6 @@ Status: reference
 
 Status: area, person, system and unclassified
   (no value: the field is present and empty)
-
-Sprint state
-  planned → active → ended
 ```
 
 ### Error codes
@@ -1227,6 +1224,7 @@ All errors follow the format `{DOMAIN}_{CATEGORY}_{DETAIL}`. The domain is `CORE
 | `CORE_INPUT_INVALID`         | No        | The request has the wrong shape, or a value is not allowed for the field |
 | `CORE_CONFIRMATION_REQUIRED` | No        | The action needs a confirmation that has not been given                  |
 | `CORE_STORE_UNAVAILABLE`     | Yes       | The local store cannot be read, so nothing is written                    |
+| `CORE_AUTOMATIC_CHANGES_OFF` | No        | The action needs an automatic change, which this computer does not make  |
 | `CORE_INTERNAL_ERROR`        | No        | An unexpected fault inside the application core                          |
 | `SETTINGS_FILE_UNREADABLE`   | No        | The settings file could not be read, so it is not overwritten            |
 | `ORGANISE_BLOCKER_LOOP`      | No        | The dependency would form a loop between tasks                           |
@@ -1260,20 +1258,21 @@ Test locations, conventions and commands are in [`CLAUDE.md`, Sections 6 and 9](
 
 All configuration is through the plugin's settings tab in Obsidian. No environment file is needed.
 
-| Setting                     | Default                                                                          | Description                                                                                                       |
-| --------------------------- | -------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| Timezone                    | Set when Feature 14 is built                                                     | The time zone used for dates, alerts and working days                                                             |
-| Daily working hours         | Set when Feature 14 is built                                                     | Start and end times. An alert for a date with no time fires at the start time                                     |
-| Weekend days                | Set when Feature 14 is built                                                     | Days that are not working days. A Sprint cannot end on one                                                        |
-| Maybe wait (paid)           | Set when Feature 14 is built                                                     | 30 to 365 days before a Maybe item (a task you are considering, or a held idea or resource) is listed in a review |
-| Operational review steps    | Set when Feature 14 is built                                                     | Which steps to include, and a reset of any step's checklist to its original                                       |
-| Clarify pause window (paid) | 2 minutes                                                                        | How long to wait before the AI clarifies a capture, up to 1,440 minutes                                           |
-| Language and spelling       | UK English                                                                       | UK or US English for the application's wording                                                                    |
-| Date format                 | Set when Feature 14 is built                                                     | How dates are shown. Stored values do not change                                                                  |
-| Your name                   | Set on first run                                                                 | The title of your person note, which your own tasks link to                                                       |
-| Context list                | `discuss`, `process`, `search`, `analyse`, `message`, `create`, `errand`, `plan` | The work modes a task can have. You may add or delete any value                                                   |
-| Date alerts                 | Set when Feature 14 is built                                                     | Turns date alerts on or off                                                                                       |
-| Licence key and trial start | None                                                                             | Starts the free trial or enters a paid key. Until then you are on the free plan                                   |
+| Setting                     | Default                                                                          | Description                                                                                                                                     |
+| --------------------------- | -------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| Timezone                    | Set when Feature 14 is built                                                     | The time zone used for dates, alerts and working days                                                                                           |
+| Daily working hours         | Set when Feature 14 is built                                                     | Start and end times. An alert for a date with no time fires at the start time                                                                   |
+| Weekend days                | Set when Feature 14 is built                                                     | Days that are not working days. A Sprint cannot end on one                                                                                      |
+| Maybe wait (paid)           | Set when Feature 14 is built                                                     | 30 to 365 days before a Maybe item (a task you are considering, or a held idea or resource) is listed in a review                               |
+| Operational review steps    | Set when Feature 14 is built                                                     | Which steps to include, and a reset of any step's checklist to its original                                                                     |
+| Clarify pause window (paid) | 2 minutes                                                                        | How long to wait before the AI clarifies a capture, up to 1,440 minutes                                                                         |
+| Language and spelling       | UK English                                                                       | UK or US English for the application's wording                                                                                                  |
+| Date format                 | Set when Feature 14 is built                                                     | How dates are shown. Stored values do not change                                                                                                |
+| Your name                   | Set on first run                                                                 | The title of your person note, which your own tasks link to                                                                                     |
+| Context list                | `discuss`, `process`, `search`, `analyse`, `message`, `create`, `errand`, `plan` | The work modes a task can have. You may add or delete any value                                                                                 |
+| Date alerts                 | Set when Feature 14 is built                                                     | Turns date alerts on or off                                                                                                                     |
+| Automatic changes           | On                                                                               | Whether this computer makes the changes the application works out itself. Leave it on for one computer per vault and switch it off on any other |
+| Licence key and trial start | None                                                                             | Starts the free trial or enters a paid key. Until then you are on the free plan                                                                 |
 
 Settings are stored in `.task-orchestrator/settings.json` in the vault. The licence key is the exception. It is kept in Obsidian's secret storage (Obsidian's protected store for passwords and keys), never in that file. So far the settings tab shows only the language setting. How settings are read and saved is described in `packages/core/src/settings/README.md`.
 
