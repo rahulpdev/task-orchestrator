@@ -81,7 +81,7 @@ Check the test client against a copy of the fixture vault:
 
 ```bash
 VAULT_COPY="$(mktemp -d)" && cp -R test-vault/. "$VAULT_COPY"
-node packages/test-client/src/cli.ts "$VAULT_COPY" updateSettings '{"language":"en-US"}' > "$VAULT_COPY.result.json" 2> "$VAULT_COPY.log.jsonl"; echo "exit=$?"
+node packages/test-client/src/cli.ts "$VAULT_COPY" updateSettings '{"language":"en-US"}' --config-folder .obsidian > "$VAULT_COPY.result.json" 2> "$VAULT_COPY.log.jsonl"; echo "exit=$?"
 node -e "const fs=require('node:fs'); const [resultPath, logPath]=process.argv.slice(1); const result=JSON.parse(fs.readFileSync(resultPath,'utf8')); const lines=fs.readFileSync(logPath,'utf8').split('\n').filter(Boolean).map((line)=>JSON.parse(line)); if (!result.ok || lines.length===0 || !lines.every((line)=>line.correlationId===result.correlationId)) { console.error('test client check failed'); process.exit(1); } console.log('test client ok');" "$VAULT_COPY.result.json" "$VAULT_COPY.log.jsonl"
 ```
 

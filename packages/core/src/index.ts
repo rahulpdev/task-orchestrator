@@ -17,7 +17,7 @@ import type { Language, MessageCatalogue } from './core/messages/index.ts';
 import type { CoreAdapters } from './core/ports.ts';
 import { settingsOperations } from './settings/index.ts';
 
-export { frontMatterValuesEqual } from './core/ports.ts';
+export { frontMatterValuesEqual } from './core/front-matter-values.ts';
 export { DEFAULT_USER_SETTINGS } from './settings/index.ts';
 
 export type { Actor, CoreRequest, OperationKind, Result } from './core/api.ts';
@@ -37,6 +37,7 @@ export type {
 	NotifierPort,
 	SecretsPort,
 	SecretWriteOutcome,
+	SettingsPort,
 	StorePort,
 	StoreReadOutcome,
 	VaultChange,

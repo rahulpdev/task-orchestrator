@@ -1,19 +1,16 @@
 /**
- * Schemas for the user's settings file, `.task-orchestrator/settings.json`.
+ * Schemas for the user's settings, saved through the settings port.
  *
  * @packageDocumentation
  */
 import * as z from 'zod';
 import { LANGUAGES } from '../core/messages/index.ts';
 
-/** Where the settings live, relative to the local store folder. */
-export const SETTINGS_STORE_PATH = 'settings.json';
-
 const LOG_LEVELS = ['debug', 'info', 'warn', 'error'] as const;
 
 /**
- * The saved settings. Unknown keys are kept (`looseObject`), so a file written by a newer
- * version never loses fields when this version saves it.
+ * The saved settings. Unknown keys are kept (`looseObject`), so settings saved by a newer
+ * version keep their fields when this version saves them.
  */
 export const UserSettingsSchema = z.looseObject({
 	language: z.enum(LANGUAGES).default('en-GB'),
@@ -24,7 +21,7 @@ export const UserSettingsSchema = z.looseObject({
 /** The user's settings after defaults are filled in. */
 export type UserSettings = z.infer<typeof UserSettingsSchema>;
 
-/** The settings a new or unreadable settings file falls back to. */
+/** The settings used when nothing is saved or the saved settings are damaged. */
 export const DEFAULT_USER_SETTINGS: UserSettings = UserSettingsSchema.parse({});
 
 /** A change the user may make; any other key is refused. */

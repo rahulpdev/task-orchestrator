@@ -2,6 +2,7 @@ import { readdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { copyFixtureVault, FIXTURE_NOTE_ID } from '../test-helpers/vault-copy.ts';
+import { createFileSettingsAdapter, settingsFilePathFor } from './file-settings-adapter.ts';
 import { createFileStoreAdapter } from './file-store-adapter.ts';
 import { createFileVaultAdapter } from './file-vault-adapter.ts';
 import { createMemorySecretsAdapter } from './memory-secrets-adapter.ts';
@@ -134,6 +135,46 @@ describe('the file store adapter', () => {
 		await expect(
 			createFileStoreAdapter(vaultPath).readFile('../Fixture note.md'),
 		).rejects.toThrow(/leaves the store folder/);
+	});
+});
+
+describe('the file settings adapter', () => {
+	const settingsFile = () => settingsFilePathFor(vaultPath, '.obsidian');
+	const createSettings = () => createFileSettingsAdapter(vaultPath, '.obsidian');
+
+	it('gives null when nothing has been saved', async () => {
+		expect(await createSettings().load()).toBeNull();
+	});
+
+	it('saves tab-indented JSON with a trailing newline and reads it back', async () => {
+		const settings = createSettings();
+		await settings.save({ language: 'en-US' });
+		expect(await readFile(settingsFile(), 'utf8')).toBe('{\n\t"language": "en-US"\n}\n');
+		expect(await settings.load()).toEqual({ language: 'en-US' });
+		expect(await readdir(path.dirname(settingsFile()))).not.toContain('data.json.tmp');
+	});
+
+	it.each(['', '.', '..', 'settings/.obsidian', 'settings\\.obsidian'])(
+		'refuses the config folder name %j',
+		(configFolderName) => {
+			expect(() => createFileSettingsAdapter(vaultPath, configFolderName)).toThrow(
+				/Not a single folder name/,
+			);
+		},
+	);
+
+	it('uses the config folder it is given', async () => {
+		await createFileSettingsAdapter(vaultPath, '.config').save({ language: 'en-US' });
+		expect(await readFile(settingsFilePathFor(vaultPath, '.config'), 'utf8')).toContain(
+			'en-US',
+		);
+	});
+
+	it('throws for text that is not JSON', async () => {
+		const settings = createSettings();
+		await settings.save({});
+		await writeFile(settingsFile(), '{ not json', 'utf8');
+		await expect(settings.load()).rejects.toThrow(SyntaxError);
 	});
 });
 

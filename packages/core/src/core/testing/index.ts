@@ -5,6 +5,7 @@
  * @packageDocumentation
  */
 import type { CoreAdapters } from '../ports.ts';
+import { createInMemorySettings } from './in-memory-settings.ts';
 import { createInMemoryStore } from './in-memory-store.ts';
 import { createInMemoryVault } from './in-memory-vault.ts';
 import {
@@ -16,6 +17,8 @@ import {
 
 export { applyPatch, createInMemoryVault } from './in-memory-vault.ts';
 export type { InMemoryNote, InMemoryVault } from './in-memory-vault.ts';
+export { createInMemorySettings } from './in-memory-settings.ts';
+export type { InMemorySettings } from './in-memory-settings.ts';
 export { createInMemoryStore } from './in-memory-store.ts';
 export type { InMemoryStore } from './in-memory-store.ts';
 export {
@@ -41,6 +44,7 @@ export function createTestAdapters(overrides: Partial<CoreAdapters> = {}): CoreA
 	return {
 		vault: createInMemoryVault(),
 		store: createInMemoryStore(),
+		settings: createInMemorySettings(),
 		clock: createPretendClock(),
 		notifier: createRecordingNotifier(),
 		secrets: createInMemorySecrets(),

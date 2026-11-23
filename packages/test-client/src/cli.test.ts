@@ -2,9 +2,11 @@ import { spawnSync } from 'node:child_process';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { settingsFilePathFor } from './adapters/file-settings-adapter.ts';
 import { copyFixtureVault } from './test-helpers/vault-copy.ts';
 
 const CLI_PATH = path.resolve(import.meta.dirname, 'cli.ts');
+const CONFIG_FOLDER_NAME = '.obsidian';
 
 let vaultPath = '';
 let removeCopy: () => Promise<void> = () => Promise.resolve();
@@ -17,12 +19,17 @@ afterEach(async () => {
 	await removeCopy();
 });
 
-function runCli(cliArguments: readonly string[]): {
+function runCli(
+	cliArguments: readonly string[],
+	configFolderArguments: readonly string[] = ['--config-folder', CONFIG_FOLDER_NAME],
+): {
 	readonly exitCode: number | null;
 	readonly stdout: string;
 	readonly stderr: string;
 } {
-	const run = spawnSync(process.execPath, [CLI_PATH, ...cliArguments], { encoding: 'utf8' });
+	const run = spawnSync(process.execPath, [CLI_PATH, ...cliArguments, ...configFolderArguments], {
+		encoding: 'utf8',
+	});
 	return { exitCode: run.status, stdout: run.stdout, stderr: run.stderr };
 }
 
@@ -49,11 +56,10 @@ describe('the test client command line', () => {
 	it('saves a setting, and every log line carries the result correlation ID', async () => {
 		const run = runCli([vaultPath, 'updateSettings', '{"language":"en-US"}']);
 		expect(run.exitCode).toBe(0);
-		const saved = await readFile(
-			path.join(vaultPath, '.task-orchestrator', 'settings.json'),
-			'utf8',
+		const saved: unknown = JSON.parse(
+			await readFile(settingsFilePathFor(vaultPath, CONFIG_FOLDER_NAME), 'utf8'),
 		);
-		expect(saved).toContain('"language": "en-US"');
+		expect(saved).toMatchObject({ language: 'en-US' });
 		const correlationId = correlationIdOf(run.stdout);
 		const logLines = run.stderr
 			.trim()
@@ -82,6 +88,18 @@ describe('the test client command line', () => {
 		const run = runCli([vaultPath, ...extraArguments]);
 		expect(run.exitCode).toBe(2);
 		expect(run.stderr).toContain('Usage:');
+		expect(run.stdout).toBe('');
+	});
+
+	it.each([
+		['a missing config folder', []],
+		['a config folder with no name', ['--config-folder']],
+		['a config folder outside the vault', ['--config-folder', '..']],
+		['a config folder path', ['--config-folder', 'settings/.obsidian']],
+	])('exits 2 with usage for %s', (_label, configFolderArguments) => {
+		const run = runCli([vaultPath, 'ping'], configFolderArguments);
+		expect(run.exitCode).toBe(2);
+		expect(run.stderr).toContain('--config-folder');
 		expect(run.stdout).toBe('');
 	});
 

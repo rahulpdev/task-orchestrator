@@ -5,13 +5,21 @@
  * @packageDocumentation
  */
 import { createCore } from '@task-orchestrator/core';
-import type { Core, CoreAdapters, LogEvent, StorePort } from '@task-orchestrator/core';
+import type {
+	Core,
+	CoreAdapters,
+	LogEvent,
+	SettingsPort,
+	StorePort,
+} from '@task-orchestrator/core';
 
 /** The core plus everything it wrote. */
 export interface FakeCore {
 	readonly core: Core;
 	readonly adapters: CoreAdapters;
 	readonly storeFiles: Map<string, string>;
+	/** What the settings file holds; `value` is `null` when nothing has been saved. */
+	readonly savedSettings: { value: unknown };
 	readonly notices: string[];
 	readonly logLines: LogEvent[];
 }
@@ -49,16 +57,20 @@ export function createMemoryStore(storeFiles: Map<string, string>): StorePort {
 /**
  * Builds a real core over in-memory adapters.
  *
- * @param fakeCoreOptions - Files the store starts with, or a store that replaces it.
+ * @param fakeCoreOptions - Files the store starts with, or a store that replaces it; the value
+ *   the settings file starts with, or a settings adapter that replaces it.
  * @returns The core and what it wrote.
  */
 export function createFakeCore(
 	fakeCoreOptions: {
 		readonly storeFiles?: Readonly<Record<string, string>>;
 		readonly store?: StorePort;
+		readonly savedSettings?: unknown;
+		readonly settings?: SettingsPort;
 	} = {},
 ): FakeCore {
 	const storeFiles = new Map(Object.entries(fakeCoreOptions.storeFiles ?? {}));
+	const savedSettings = { value: fakeCoreOptions.savedSettings ?? null };
 	const notices: string[] = [];
 	const logLines: LogEvent[] = [];
 	const adapters: CoreAdapters = {
@@ -76,6 +88,13 @@ export function createFakeCore(
 			},
 		},
 		store: fakeCoreOptions.store ?? createMemoryStore(storeFiles),
+		settings: fakeCoreOptions.settings ?? {
+			load: () => Promise.resolve(savedSettings.value),
+			save: (settings) => {
+				savedSettings.value = settings;
+				return Promise.resolve();
+			},
+		},
 		clock: { now: () => new Date('2026-11-10T09:30:00.000Z'), timezone: () => 'Europe/London' },
 		notifier: {
 			notice: (message) => {
@@ -93,5 +112,5 @@ export function createFakeCore(
 			},
 		},
 	};
-	return { core: createCore(adapters), adapters, storeFiles, notices, logLines };
+	return { core: createCore(adapters), adapters, storeFiles, savedSettings, notices, logLines };
 }

@@ -7,6 +7,7 @@
 import { createCore } from '@task-orchestrator/core';
 import type { ClockPort, Core, LogLevel, LogSink } from '@task-orchestrator/core';
 import { createSystemClock } from './adapters/clock-adapter.ts';
+import { createFileSettingsAdapter } from './adapters/file-settings-adapter.ts';
 import { createFileStoreAdapter } from './adapters/file-store-adapter.ts';
 import { createFileVaultAdapter } from './adapters/file-vault-adapter.ts';
 import { createStderrLogSink } from './adapters/log-sink-adapter.ts';
@@ -15,6 +16,11 @@ import { createPrintingNotifier } from './adapters/printing-notifier-adapter.ts'
 
 /** Settings for {@link createTestClient}. */
 export interface TestClientOptions {
+	/**
+	 * The vault's config folder: the folder at the top of the vault where the host application
+	 * keeps its settings, which each install may rename. The plugin's settings file is inside it.
+	 */
+	readonly configFolderName: string;
 	/** Defaults to the system clock. */
 	readonly clock?: ClockPort;
 	/** Defaults to `info`. */
@@ -33,18 +39,21 @@ export interface TestClient {
  * Wires every file-based adapter into a new core.
  *
  * @param vaultPath - The vault folder to work on.
- * @param testClientOptions - Clock, minimum log level and log sink.
+ * @param testClientOptions - The config folder name, and optionally the clock, minimum log level
+ *   and log sink.
  * @returns The core and the notices it shows.
+ * @throws Error when the config folder name is not a single folder name.
  */
 export function createTestClient(
 	vaultPath: string,
-	testClientOptions: TestClientOptions = {},
+	testClientOptions: TestClientOptions,
 ): TestClient {
 	const notifier = createPrintingNotifier();
 	const core = createCore(
 		{
 			vault: createFileVaultAdapter(vaultPath),
 			store: createFileStoreAdapter(vaultPath),
+			settings: createFileSettingsAdapter(vaultPath, testClientOptions.configFolderName),
 			clock: testClientOptions.clock ?? createSystemClock(),
 			notifier,
 			secrets: createMemorySecretsAdapter(),

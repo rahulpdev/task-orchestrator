@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { frontMatterValuesEqual } from './ports.ts';
+import { frontMatterValuesEqual } from './front-matter-values.ts';
 
 describe('frontMatterValuesEqual', () => {
 	it('treats a missing field as equal to an expectation of null', () => {

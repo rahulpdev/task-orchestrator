@@ -3,35 +3,32 @@ import { describe, expect, it } from 'vitest';
 import { createFakeCore } from '../test-helpers/fake-core.ts';
 import { loadUserSettings, saveSettingsChange } from './settings-state.ts';
 
-const failingStore = {
-	readFile: () => Promise.reject(new Error('disk unavailable')),
-	writeFileAtomic: () => Promise.reject(new Error('disk unavailable')),
-	appendLine: () => Promise.resolve(),
-	listFolder: () => Promise.resolve([]),
-	deleteFile: () => Promise.resolve(),
+const failingSettings = {
+	load: () => Promise.reject(new Error('disk unavailable')),
+	save: () => Promise.reject(new Error('disk unavailable')),
 };
 
 describe('loadUserSettings', () => {
-	it('returns the saved settings and shows no notice for a valid file', async () => {
-		const fake = createFakeCore({ storeFiles: { 'settings.json': '{"language":"en-US"}' } });
+	it('returns the saved settings and shows no notice for valid settings', async () => {
+		const fake = createFakeCore({ savedSettings: { language: 'en-US' } });
 		const settings = await loadUserSettings(fake.core, fake.adapters.notifier);
 		expect(settings.language).toBe('en-US');
 		expect(fake.notices).toEqual([]);
 	});
 
-	it('returns the defaults and shows settingsUnreadable exactly once for a corrupt file', async () => {
-		const fake = createFakeCore({ storeFiles: { 'settings.json': '{ not json' } });
+	it('returns the defaults and shows settingsUnreadable exactly once for damaged settings', async () => {
+		const fake = createFakeCore({ savedSettings: '{ not json' });
 		const settings = await loadUserSettings(fake.core, fake.adapters.notifier);
 		expect(settings).toEqual(DEFAULT_USER_SETTINGS);
 		expect(fake.notices).toEqual([fake.core.messagesFor('en-GB').notices.settingsUnreadable]);
 	});
 
 	it("returns the defaults and shows the code's notice when the query fails", async () => {
-		const fake = createFakeCore({ store: failingStore });
+		const fake = createFakeCore({ settings: failingSettings });
 		const settings = await loadUserSettings(fake.core, fake.adapters.notifier);
 		expect(settings).toEqual(DEFAULT_USER_SETTINGS);
 		expect(fake.notices).toEqual([
-			fake.core.messagesFor('en-GB').errorNotices.CORE_STORE_UNAVAILABLE,
+			fake.core.messagesFor('en-GB').errorNotices.SETTINGS_FILE_UNREADABLE,
 		]);
 	});
 
@@ -60,11 +57,11 @@ describe('saveSettingsChange', () => {
 			operationVersion: 1,
 			actor: 'user',
 		});
-		expect(fake.storeFiles.get('settings.json')).toContain('"language": "en-US"');
+		expect(fake.savedSettings.value).toMatchObject({ language: 'en-US' });
 	});
 
 	it("shows the code's notice and returns null when the save fails", async () => {
-		const fake = createFakeCore({ storeFiles: { 'settings.json': '{ not json' } });
+		const fake = createFakeCore({ savedSettings: '{ not json' });
 		const saved = await saveSettingsChange(
 			fake.core,
 			fake.adapters.notifier,

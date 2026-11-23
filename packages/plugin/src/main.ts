@@ -15,7 +15,7 @@ import { TaskOrchestratorSettingTab } from './settings/settings-tab.ts';
 export default class TaskOrchestratorPlugin extends Plugin {
 	private loadedCore: Core | null = null;
 	private loadedAdapters: CoreAdapters | null = null;
-	/** The settings in use, kept in memory; saved only through the core, never to `data.json`. */
+	/** The settings in use, kept in memory; saved only through the core. */
 	override settings: UserSettings = DEFAULT_USER_SETTINGS;
 
 	/**
@@ -84,9 +84,7 @@ export default class TaskOrchestratorPlugin extends Plugin {
 	}
 
 	/**
-	 * Reloads settings when a sync tool changes the plugin's data. Settings changed in
-	 * `settings.json` are otherwise picked up at the next load, until the vault slice watches
-	 * the store.
+	 * Reloads the settings when a sync tool changes Obsidian's settings file for the plugin.
 	 *
 	 * @returns A promise that settles once the settings are reloaded.
 	 */

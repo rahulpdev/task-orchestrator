@@ -1,13 +1,13 @@
 import { describe, expect, it } from 'vitest';
-import { applySettingsMigrations, parseSettingsFile } from './rules.ts';
+import { applySettingsMigrations, parseSavedSettings } from './rules.ts';
 import type { SettingsMigration } from './rules.ts';
 import { DEFAULT_USER_SETTINGS } from './schemas.ts';
 
-describe('parseSettingsFile', () => {
-	it.each(['not json', '42', '[]', 'null', '{"language":"fr-FR"}', '{"minimumLogLevel":3}'])(
+describe('parseSavedSettings', () => {
+	it.each(['not json', 42, [], null, { language: 'fr-FR' }, { minimumLogLevel: 3 }])(
 		'gives the defaults and corrupt for %j',
-		(fileContents) => {
-			expect(parseSettingsFile(fileContents)).toEqual({
+		(savedValue) => {
+			expect(parseSavedSettings(savedValue)).toEqual({
 				settings: DEFAULT_USER_SETTINGS,
 				loadStatus: 'corrupt',
 			});
@@ -15,14 +15,14 @@ describe('parseSettingsFile', () => {
 	);
 
 	it('gives the defaults and valid for an empty object', () => {
-		expect(parseSettingsFile('{}')).toEqual({
+		expect(parseSavedSettings({})).toEqual({
 			settings: DEFAULT_USER_SETTINGS,
 			loadStatus: 'valid',
 		});
 	});
 
 	it('keeps keys it does not know', () => {
-		const parsed = parseSettingsFile('{"language":"en-US","futureSetting":true}');
+		const parsed = parseSavedSettings({ language: 'en-US', futureSetting: true });
 		expect(parsed.settings).toMatchObject({ language: 'en-US', futureSetting: true });
 	});
 });

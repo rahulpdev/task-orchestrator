@@ -1,6 +1,5 @@
 /**
- * Reading and saving the user's settings through the core. Nothing is read from or written to
- * the plugin's `data.json`: settings live in the local store (`.task-orchestrator/settings.json`).
+ * Reading and saving the user's settings. Settings are read and saved only through the core.
  *
  * @packageDocumentation
  */

@@ -4,7 +4,7 @@
  *
  * @packageDocumentation
  */
-import { frontMatterValuesEqual } from '../ports.ts';
+import { frontMatterValuesEqual } from '../front-matter-values.ts';
 import type {
 	FrontMatter,
 	FrontMatterExpectation,

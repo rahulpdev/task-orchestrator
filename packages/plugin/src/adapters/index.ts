@@ -10,6 +10,7 @@ import { createObsidianLogSink } from './log-sink-adapter.ts';
 import { createObsidianNotifierAdapter } from './notifier-adapter.ts';
 import { readOpenEditorTexts } from './open-editors.ts';
 import { createObsidianSecretsAdapter } from './secrets-adapter.ts';
+import { createObsidianSettingsAdapter } from './settings-adapter.ts';
 import { createObsidianStoreAdapter } from './store-adapter.ts';
 import { createObsidianVaultAdapter } from './vault-adapter.ts';
 import { createPerFileWriteQueue } from './write-queue.ts';
@@ -36,9 +37,10 @@ export interface AdapterOptions {
 /**
  * Builds every adapter from the plugin, never from the global `app`.
  *
- * @param plugin - The plugin instance; its `app` and `registerEvent` are used.
+ * @param plugin - The plugin instance; its `app`, `registerEvent`, `loadData` and `saveData` are
+ *   used.
  * @param adapterOptions - Minimum log level and logger access.
- * @returns The six adapters and the log flush.
+ * @returns The seven adapters and the log flush.
  */
 export function createObsidianAdapters(
 	plugin: Plugin,
@@ -64,6 +66,7 @@ export function createObsidianAdapters(
 		adapters: {
 			vault,
 			store,
+			settings: createObsidianSettingsAdapter(plugin),
 			clock: createObsidianClockAdapter(),
 			notifier: createObsidianNotifierAdapter(),
 			secrets: createObsidianSecretsAdapter(app),

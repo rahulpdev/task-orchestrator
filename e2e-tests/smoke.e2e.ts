@@ -40,6 +40,28 @@ async function countNoticesWithText(noticeText: string): Promise<number> {
 	return texts.filter((text) => text.includes(noticeText)).length;
 }
 
+async function readSettingsFileText(): Promise<string> {
+	return browser.executeObsidian(
+		({ app, obsidian }, pluginId) =>
+			app.vault.adapter.read(
+				obsidian.normalizePath(`${app.vault.configDir}/plugins/${pluginId}/data.json`),
+			),
+		PLUGIN_ID,
+	);
+}
+
+async function writeSettingsFileText(fileText: string): Promise<void> {
+	await browser.executeObsidian(
+		({ app, obsidian }, pluginId, chosenText) =>
+			app.vault.adapter.write(
+				obsidian.normalizePath(`${app.vault.configDir}/plugins/${pluginId}/data.json`),
+				chosenText,
+			),
+		PLUGIN_ID,
+		fileText,
+	);
+}
+
 async function setLanguage(language: 'en-GB' | 'en-US'): Promise<boolean> {
 	return browser.executeObsidian(async ({ plugins }, chosenLanguage) => {
 		const result = await plugins.taskOrchestrator.core.execute({
@@ -127,10 +149,8 @@ describe('Personal Task Orchestrator in a real Obsidian', function () {
 
 	it('saves a setting and reads it back after a reload of the plugin', async function () {
 		expect(await setLanguage('en-US')).toBe(true);
-		const settingsText = await browser.executeObsidian(({ app }) =>
-			app.vault.adapter.read('.task-orchestrator/settings.json'),
-		);
-		expect(settingsText).toContain('"language": "en-US"');
+		const savedSettings: unknown = JSON.parse(await readSettingsFileText());
+		expect(savedSettings).toMatchObject({ language: 'en-US' });
 		await obsidianPage.disablePlugin(PLUGIN_ID);
 		await obsidianPage.enablePlugin(PLUGIN_ID);
 		const languageAfterReload = await browser.executeObsidian(async ({ plugins }) => {
@@ -144,6 +164,45 @@ describe('Personal Task Orchestrator in a real Obsidian', function () {
 		});
 		expect(languageAfterReload).toBe('en-US');
 		expect(await setLanguage('en-GB')).toBe(true);
+	});
+
+	it('never overwrites a settings file that is not valid JSON', async function () {
+		const damagedText = '{ not json';
+		await writeSettingsFileText(damagedText);
+		await obsidianPage.disablePlugin(PLUGIN_ID);
+		await obsidianPage.enablePlugin(PLUGIN_ID);
+		try {
+			const settingsRead = await browser.executeObsidian(async ({ plugins }) => {
+				const result = await plugins.taskOrchestrator.core.query({
+					name: 'settings',
+					version: 1,
+					actor: 'application',
+					payload: {},
+				});
+				return result.ok
+					? { loadStatus: result.outcome.loadStatus }
+					: { errorCode: result.error.errorCode };
+			});
+			expect([
+				{ loadStatus: 'corrupt' },
+				{ errorCode: 'SETTINGS_FILE_UNREADABLE' },
+			]).toContainEqual(settingsRead);
+			const update = await browser.executeObsidian(async ({ plugins }) => {
+				const result = await plugins.taskOrchestrator.core.execute({
+					name: 'updateSettings',
+					version: 1,
+					actor: 'user',
+					payload: { language: 'en-US' },
+				});
+				return result.ok ? 'saved' : result.error.errorCode;
+			});
+			expect(update).toBe('SETTINGS_FILE_UNREADABLE');
+			expect(await readSettingsFileText()).toBe(damagedText);
+		} finally {
+			await writeSettingsFileText('{}\n');
+			await obsidianPage.disablePlugin(PLUGIN_ID);
+			await obsidianPage.enablePlugin(PLUGIN_ID);
+		}
 	});
 
 	it('writes front matter through the vault adapter and refuses a stale expectation', async function () {

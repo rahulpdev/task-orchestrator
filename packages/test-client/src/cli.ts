@@ -4,7 +4,11 @@
  * folder and prints its `Result` as JSON.
  *
  * Usage: `node packages/test-client/src/cli.ts <vaultPath> <operationName> [jsonPayload]
- * [--version <n>] [--log-level <level>]`
+ * --config-folder <name> [--version <n>] [--log-level <level>]`
+ *
+ * `--config-folder` is required: it names the vault's config folder, where the host application
+ * keeps its settings and this plugin's settings file. Each install may rename that folder, and
+ * the test client cannot ask the host application, so the caller names it.
  *
  * Standard output carries only the `Result`; log lines go to standard error. Exit codes: 0 when
  * the result is `ok`, 1 when it is not, 2 for a usage error.
@@ -15,19 +19,22 @@ import { randomUUID } from 'node:crypto';
 import { stat } from 'node:fs/promises';
 import process from 'node:process';
 import type { LogLevel } from '@task-orchestrator/core';
+import { isConfigFolderName } from './adapters/file-settings-adapter.ts';
 import { createTestClient } from './index.ts';
 
 interface CliArguments {
 	readonly vaultPath: string;
 	readonly operationName: string;
+	readonly configFolderName: string;
 	readonly payload: unknown;
 	readonly version: number;
 	readonly minimumLogLevel: LogLevel;
 }
 
 const USAGE =
-	'Usage: node packages/test-client/src/cli.ts <vaultPath> <operationName> [jsonPayload] [--version <n>] [--log-level <debug|info|warn|error>]';
+	'Usage: node packages/test-client/src/cli.ts <vaultPath> <operationName> [jsonPayload] --config-folder <name> [--version <n>] [--log-level <debug|info|warn|error>]';
 const LOG_LEVELS: readonly string[] = ['debug', 'info', 'warn', 'error'];
+const VALUE_FLAGS: readonly string[] = ['--config-folder', '--version', '--log-level'];
 
 /**
  * Reads the command line into arguments, or explains what is wrong with it.
@@ -40,7 +47,7 @@ function parseArguments(argumentList: readonly string[]): CliArguments | string 
 	const flags = new Map<string, string>();
 	for (let argumentIndex = 0; argumentIndex < argumentList.length; argumentIndex += 1) {
 		const argument = argumentList[argumentIndex] ?? '';
-		if (argument === '--version' || argument === '--log-level') {
+		if (VALUE_FLAGS.includes(argument)) {
 			const flagValue = argumentList[argumentIndex + 1];
 			if (flagValue === undefined) {
 				return `${argument} needs a value.`;
@@ -54,6 +61,10 @@ function parseArguments(argumentList: readonly string[]): CliArguments | string 
 	const [vaultPath, operationName, payloadText = '{}'] = positional;
 	if (vaultPath === undefined || operationName === undefined || positional.length > 3) {
 		return 'Expected a vault path, an operation name and an optional JSON payload.';
+	}
+	const configFolderName = flags.get('--config-folder');
+	if (configFolderName === undefined || !isConfigFolderName(configFolderName)) {
+		return '--config-folder must name one folder at the top of the vault.';
 	}
 	const version = Number(flags.get('--version') ?? '1');
 	const minimumLogLevel = flags.get('--log-level') ?? 'info';
@@ -69,7 +80,7 @@ function parseArguments(argumentList: readonly string[]): CliArguments | string 
 	} catch {
 		return 'The payload is not valid JSON.';
 	}
-	return { vaultPath, operationName, payload, version, minimumLogLevel };
+	return { vaultPath, operationName, configFolderName, payload, version, minimumLogLevel };
 }
 
 function isLogLevel(candidate: string): candidate is LogLevel {
@@ -101,6 +112,7 @@ async function main(argumentList: readonly string[]): Promise<void> {
 		return;
 	}
 	const { core } = createTestClient(cliArguments.vaultPath, {
+		configFolderName: cliArguments.configFolderName,
 		minimumLogLevel: cliArguments.minimumLogLevel,
 	});
 	const envelope = {

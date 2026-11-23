@@ -189,6 +189,24 @@ export interface StorePort {
 	deleteFile(storePath: string): Promise<void>;
 }
 
+/** The user's settings, kept in the host's settings file for the plugin. */
+export interface SettingsPort {
+	/**
+	 * Reads the saved settings.
+	 *
+	 * @returns The saved value, or `null` when nothing has been saved. Throws when the file
+	 * cannot be read.
+	 */
+	load(): Promise<unknown>;
+	/**
+	 * Replaces the whole saved value.
+	 *
+	 * @param settings - The settings to save.
+	 * @returns A promise that settles once the settings are saved.
+	 */
+	save(settings: Readonly<Record<string, unknown>>): Promise<void>;
+}
+
 /** Short messages shown to the user. */
 export interface NotifierPort {
 	/**
@@ -258,42 +276,9 @@ export interface ClockPort {
 export interface CoreAdapters {
 	readonly vault: VaultPort;
 	readonly store: StorePort;
+	readonly settings: SettingsPort;
 	readonly clock: ClockPort;
 	readonly notifier: NotifierPort;
 	readonly secrets: SecretsPort;
 	readonly logSink: LogSink;
-}
-
-/**
- * The single conflict rule every vault adapter applies (TAD E7): does a field still hold the
- * value the caller expected? Compares by JSON value, with object keys in any order; a missing
- * field equals an expectation of `null`.
- *
- * @param currentValue - The field's current value, `undefined` when absent.
- * @param expectedValue - The expected value, `null` for "absent".
- * @returns `true` when the two are equal.
- */
-export function frontMatterValuesEqual(
-	currentValue: FrontMatterValue | undefined,
-	expectedValue: FrontMatterValue | null,
-): boolean {
-	return stableJson(currentValue ?? null) === stableJson(expectedValue);
-}
-
-function stableJson(value: FrontMatterValue | null): string {
-	if (value === null || typeof value !== 'object') {
-		return JSON.stringify(value);
-	}
-	if (isFrontMatterArray(value)) {
-		return `[${value.map((item) => stableJson(item)).join(',')}]`;
-	}
-	const fieldNames = Object.keys(value).sort();
-	const parts = fieldNames.map(
-		(fieldName) => `${JSON.stringify(fieldName)}:${stableJson(value[fieldName] ?? null)}`,
-	);
-	return `{${parts.join(',')}}`;
-}
-
-function isFrontMatterArray(value: FrontMatterValue): value is readonly FrontMatterValue[] {
-	return Array.isArray(value);
 }

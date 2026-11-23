@@ -100,7 +100,7 @@ Your own choices always stand. When you change a value the application set, it r
                        │ vault and store ports, through either host's adapters
 ┌──────────────────────▼──────────────────────────────────┐
 │  The vault  (Markdown notes)                            │
-│  .task-orchestrator/ holds all plugin-owned data        │
+│  .task-orchestrator/ holds the local store              │
 └─────────────────────────────────────────────────────────┘
 ```
 
@@ -149,7 +149,7 @@ Run **Check that the application core responds** from the command palette. A not
 To run the same check without Obsidian, use the test client:
 
 ```bash
-node packages/test-client/src/cli.ts <vault> ping
+node packages/test-client/src/cli.ts <vault> ping --config-folder .obsidian
 ```
 
 ---
@@ -1238,10 +1238,10 @@ The plugin also handles these codes from the paid service: `LICENCE_INVALID`, `L
 
 The test client is a command-line interface for developers and AI agents. It runs any registered operation or query against a vault folder without Obsidian and prints its result as JSON on standard output. Log lines go to standard error. The exit code is 0 when the result is ok, 1 when it is not and 2 for a usage error.
 
-The command takes the form `node packages/test-client/src/cli.ts <vaultPath> <operationName> [jsonPayload] [--version <n>] [--log-level <level>]`. For example, this switches a vault to US English:
+The command takes the form `node packages/test-client/src/cli.ts <vaultPath> <operationName> [jsonPayload] --config-folder <name> [--version <n>] [--log-level <level>]`. `--config-folder` names the vault's Obsidian configuration folder, `.obsidian` unless it was changed in Obsidian. The plugin's settings file is inside that folder, so the test client and the plugin use the same settings. For example, this switches a vault to US English:
 
 ```bash
-node packages/test-client/src/cli.ts ./my-vault updateSettings '{"language":"en-US"}'
+node packages/test-client/src/cli.ts ./my-vault updateSettings '{"language":"en-US"}' --config-folder .obsidian
 ```
 
 Its full contract is in the comment at the top of `packages/test-client/src/cli.ts`.
@@ -1274,9 +1274,9 @@ All configuration is through the plugin's settings tab in Obsidian. No environme
 | Automatic changes           | On                                                                               | Whether this computer makes the changes the application works out itself. Leave it on for one computer per vault and switch it off on any other |
 | Licence key and trial start | None                                                                             | Starts the free trial or enters a paid key. Until then you are on the free plan                                                                 |
 
-Settings are stored in `.task-orchestrator/settings.json` in the vault. The licence key is the exception. It is kept in Obsidian's secret storage (Obsidian's protected store for passwords and keys), never in that file. So far the settings tab shows only the language setting. How settings are read and saved is described in `packages/core/src/settings/README.md`.
+Settings are stored in Obsidian's own settings file for the plugin, as every plugin's settings are. The licence key is the exception. It is kept in Obsidian's secret storage (Obsidian's protected store for passwords and keys), never in that file. So far the settings tab shows only the language setting. How settings are read and saved is described in `packages/core/src/settings/README.md`.
 
-**Database connection strings:** Not applicable — a plugin has no database. Plugin-owned data is kept in the `.task-orchestrator/` folder at the top of the vault. Its name starts with a dot, so Obsidian's file explorer, search and Bases do not show it.
+**Database connection strings:** Not applicable — a plugin has no database. The plugin keeps its local store in the `.task-orchestrator/` folder at the top of the vault. Its name starts with a dot, so Obsidian's file explorer, search and Bases do not show it.
 
 ---
 

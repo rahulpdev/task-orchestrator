@@ -1,15 +1,15 @@
 /**
- * Rules for reading the settings file and upgrading it between versions.
+ * Rules for checking saved settings and upgrading them between versions.
  *
  * @packageDocumentation
  */
 import { DEFAULT_USER_SETTINGS, UserSettingsSchema } from './schemas.ts';
 import type { UserSettings } from './schemas.ts';
 
-/** The result of parsing a settings file. */
-export interface ParsedSettingsFile {
+/** The result of checking saved settings. */
+export interface ParsedSavedSettings {
 	readonly settings: UserSettings;
-	/** `corrupt` means the defaults are in use because the file could not be understood. */
+	/** `corrupt` means the defaults are in use because the saved value could not be understood. */
 	readonly loadStatus: 'valid' | 'corrupt';
 }
 
@@ -37,23 +37,17 @@ export interface MigrationRun {
 export const SETTINGS_MIGRATIONS: readonly SettingsMigration[] = [];
 
 /**
- * Parses the settings file's text. Never throws.
+ * Checks a saved settings value. Never throws.
  *
- * @param fileContents - The file's text.
- * @returns The settings and `valid`, or the defaults and `corrupt` for invalid JSON, a
- * non-object, or a field of the wrong type.
+ * @param savedValue - The value the settings port loaded; the caller handles `null`.
+ * @returns The settings and `valid`, or the defaults and `corrupt` for a value that is not
+ * an object, is an array, or has a field of the wrong type.
  */
-export function parseSettingsFile(fileContents: string): ParsedSettingsFile {
-	let parsedJson: unknown;
-	try {
-		parsedJson = JSON.parse(fileContents);
-	} catch {
+export function parseSavedSettings(savedValue: unknown): ParsedSavedSettings {
+	if (typeof savedValue !== 'object' || savedValue === null || Array.isArray(savedValue)) {
 		return { settings: DEFAULT_USER_SETTINGS, loadStatus: 'corrupt' };
 	}
-	if (typeof parsedJson !== 'object' || parsedJson === null || Array.isArray(parsedJson)) {
-		return { settings: DEFAULT_USER_SETTINGS, loadStatus: 'corrupt' };
-	}
-	const parsedSettings = UserSettingsSchema.safeParse(parsedJson);
+	const parsedSettings = UserSettingsSchema.safeParse(savedValue);
 	return parsedSettings.success
 		? { settings: parsedSettings.data, loadStatus: 'valid' }
 		: { settings: DEFAULT_USER_SETTINGS, loadStatus: 'corrupt' };

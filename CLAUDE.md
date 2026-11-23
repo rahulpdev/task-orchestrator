@@ -58,7 +58,7 @@
 - **Framework:** Not applicable — the core is plain TypeScript behind ports, with Zod 4 for validation
 - **ORM:** Not applicable — notes are reached only through the vault port
 - **Logging:** JSON Lines through the `LogSink` port
-- **Database:** Not applicable — the local store is plain files in `.task-orchestrator/` at the top of the vault. User settings live in its `settings.json`, read and written only through the `settings` query and the `updateSettings` operation; the plugin's `data.json` is not used
+- **Database:** Not applicable — the local store is plain files in `.task-orchestrator/` at the top of the vault. User settings live in Obsidian's settings file for the plugin (`data.json`), read and written only through the settings port by the `settings` query and the `updateSettings` operation
 - **Lint/format:** ESLint 10 + eslint-plugin-obsidianmd 0.5.1 (pinned exactly, applied to every package because the community directory's scanner lints them all) + Prettier 3 (tabs, single quotes, width 100)
 - **Type checking:** `tsc` strict (with `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes` and `erasableSyntaxOnly`) + typescript-eslint `strict-type-checked`
 - **Testing:** Vitest 5 with coverage; wdio-obsidian-service 3.5
@@ -344,7 +344,7 @@ pnpm install                                               # Install all depende
 
 # Running the plugin
 pnpm dev                                                   # Watch build into the development vault
-node packages/test-client/src/cli.ts <vault> <operationName> [jsonPayload]   # Run any operation or query without Obsidian
+node packages/test-client/src/cli.ts <vault> <operationName> [jsonPayload] --config-folder .obsidian   # Run any operation or query without Obsidian
 
 # Database
 # Not applicable — a plugin has no database

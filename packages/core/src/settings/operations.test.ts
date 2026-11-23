@@ -3,22 +3,22 @@ import { createDispatcher, createOperationRegistry } from '../core/api.ts';
 import type { Dispatcher } from '../core/api.ts';
 import { createLogger } from '../core/logging.ts';
 import type { LogEvent } from '../core/logging.ts';
-import type { StorePort } from '../core/ports.ts';
+import type { SettingsPort } from '../core/ports.ts';
 import {
-	createInMemoryStore,
+	createInMemorySettings,
 	createPretendClock,
 	createRecordingLogSink,
 	createTestAdapters,
 } from '../core/testing/index.ts';
 import { settingsOperations } from './index.ts';
 
-function buildSettingsDispatcher(store: StorePort): {
+function buildSettingsDispatcher(settings: SettingsPort): {
 	readonly dispatcher: Dispatcher;
 	readonly lines: LogEvent[];
 } {
 	const logSink = createRecordingLogSink();
 	const clock = createPretendClock();
-	const adapters = createTestAdapters({ store, logSink, clock });
+	const adapters = createTestAdapters({ settings, logSink, clock });
 	const dispatcher = createDispatcher(
 		createOperationRegistry(settingsOperations),
 		adapters,
@@ -34,20 +34,14 @@ const readSettings = (dispatcher: Dispatcher) =>
 const updateSettings = (dispatcher: Dispatcher, payload: unknown) =>
 	dispatcher.execute({ name: 'updateSettings', version: 1, actor: 'user', payload });
 
-function throwingStore(): StorePort {
+function throwingSettings(): SettingsPort {
 	const fail = () => Promise.reject(new Error('disk unavailable'));
-	return {
-		readFile: fail,
-		writeFileAtomic: fail,
-		appendLine: fail,
-		listFolder: fail,
-		deleteFile: fail,
-	};
+	return { load: fail, save: fail };
 }
 
 describe('the settings query', () => {
-	it('gives the defaults and defaulted when the file is missing', async () => {
-		const { dispatcher } = buildSettingsDispatcher(createInMemoryStore());
+	it('gives the defaults and defaulted when nothing has been saved', async () => {
+		const { dispatcher } = buildSettingsDispatcher(createInMemorySettings());
 		expect(await readSettings(dispatcher)).toMatchObject({
 			ok: true,
 			outcome: { settings: { language: 'en-GB' }, loadStatus: 'defaulted' },
@@ -55,40 +49,43 @@ describe('the settings query', () => {
 	});
 
 	it('reads a saved language', async () => {
-		const store = createInMemoryStore({ 'settings.json': '{"language":"en-US"}' });
-		const { dispatcher } = buildSettingsDispatcher(store);
+		const settings = createInMemorySettings({ language: 'en-US' });
+		const { dispatcher } = buildSettingsDispatcher(settings);
 		expect(await readSettings(dispatcher)).toMatchObject({
 			ok: true,
 			outcome: { settings: { language: 'en-US' }, loadStatus: 'valid' },
 		});
 	});
 
-	it('gives the defaults and corrupt for a damaged file, and logs it', async () => {
-		const store = createInMemoryStore({ 'settings.json': '{ not json' });
-		const { dispatcher, lines } = buildSettingsDispatcher(store);
+	it('gives the defaults and corrupt for damaged settings, and logs it', async () => {
+		const settings = createInMemorySettings('{ not json');
+		const { dispatcher, lines } = buildSettingsDispatcher(settings);
 		expect(await readSettings(dispatcher)).toMatchObject({
-			outcome: { loadStatus: 'corrupt' },
+			outcome: { settings: { language: 'en-GB' }, loadStatus: 'corrupt' },
 		});
 		expect(lines.some((line) => line.event === 'settings.file.load_rejected')).toBe(true);
 	});
 
-	it('gives CORE_STORE_UNAVAILABLE when the store throws', async () => {
-		const { dispatcher } = buildSettingsDispatcher(throwingStore());
+	it('gives SETTINGS_FILE_UNREADABLE when the load throws, and logs it', async () => {
+		const { dispatcher, lines } = buildSettingsDispatcher(throwingSettings());
 		expect(await readSettings(dispatcher)).toMatchObject({
 			ok: false,
-			error: { errorCode: 'CORE_STORE_UNAVAILABLE', retryable: true },
+			error: { errorCode: 'SETTINGS_FILE_UNREADABLE', retryable: false },
 		});
+		expect(lines.some((line) => line.event === 'settings.file.read_failed')).toBe(true);
 	});
 });
 
 describe('the updateSettings operation', () => {
-	it('writes the file, and a following query returns the new value', async () => {
-		const store = createInMemoryStore();
-		const { dispatcher, lines } = buildSettingsDispatcher(store);
+	it('saves the settings, and a following query returns the new value', async () => {
+		const settings = createInMemorySettings();
+		const { dispatcher, lines } = buildSettingsDispatcher(settings);
 		expect(await updateSettings(dispatcher, { language: 'en-US' })).toMatchObject({ ok: true });
-		expect(store.files.get('settings.json')).toBe(
-			'{\n\t"language": "en-US",\n\t"appliedSettingsMigrations": [],\n\t"minimumLogLevel": "info"\n}\n',
-		);
+		expect(settings.savedValue).toEqual({
+			language: 'en-US',
+			appliedSettingsMigrations: [],
+			minimumLogLevel: 'info',
+		});
 		expect(await readSettings(dispatcher)).toMatchObject({
 			outcome: { settings: { language: 'en-US' } },
 		});
@@ -96,47 +93,68 @@ describe('the updateSettings operation', () => {
 		expect(updateLine?.changedSettingNames).toEqual(['language']);
 	});
 
-	it('refuses to overwrite a corrupt file and leaves it byte-for-byte unchanged', async () => {
-		const store = createInMemoryStore({ 'settings.json': '{ not json' });
-		const { dispatcher } = buildSettingsDispatcher(store);
-		expect(await updateSettings(dispatcher, { language: 'en-US' })).toMatchObject({
-			ok: false,
-			error: { errorCode: 'SETTINGS_FILE_UNREADABLE', retryable: false },
-		});
-		expect(store.files.get('settings.json')).toBe('{ not json');
+	it('keeps a saved key it does not recognise', async () => {
+		const settings = createInMemorySettings({ language: 'en-GB', futureSetting: true });
+		const { dispatcher } = buildSettingsDispatcher(settings);
+		expect(await updateSettings(dispatcher, { language: 'en-US' })).toMatchObject({ ok: true });
+		expect(settings.savedValue).toMatchObject({ language: 'en-US', futureSetting: true });
 	});
 
-	it('gives CORE_STORE_UNAVAILABLE when the store throws', async () => {
-		const { dispatcher } = buildSettingsDispatcher(throwingStore());
-		expect(await updateSettings(dispatcher, { language: 'en-US' })).toMatchObject({
-			error: { errorCode: 'CORE_STORE_UNAVAILABLE' },
-		});
-	});
+	it.each([['{ not json'], [[]], [42], [{ minimumLogLevel: 3 }]])(
+		'refuses to overwrite damaged settings %j and leaves them unchanged',
+		async (damagedValue) => {
+			const settings = createInMemorySettings(damagedValue);
+			const { dispatcher } = buildSettingsDispatcher(settings);
+			expect(await updateSettings(dispatcher, { language: 'en-US' })).toMatchObject({
+				ok: false,
+				error: { errorCode: 'SETTINGS_FILE_UNREADABLE', retryable: false },
+			});
+			expect(settings.savedValue).toEqual(damagedValue);
+		},
+	);
 
-	it('gives CORE_STORE_UNAVAILABLE when only the write fails', async () => {
-		const store = {
-			...createInMemoryStore(),
-			writeFileAtomic: () => Promise.reject(new Error('disk full')),
-		};
-		const { dispatcher } = buildSettingsDispatcher(store);
-		expect(await updateSettings(dispatcher, { language: 'en-US' })).toMatchObject({
-			error: { errorCode: 'CORE_STORE_UNAVAILABLE' },
-		});
-	});
-
-	it('refuses an unknown key before the store is read', async () => {
-		let storeWasRead = false;
-		const store: StorePort = {
-			...createInMemoryStore(),
-			readFile: () => {
-				storeWasRead = true;
-				return Promise.resolve({ status: 'missing' });
+	it('gives SETTINGS_FILE_UNREADABLE and saves nothing when the load throws', async () => {
+		let saveWasCalled = false;
+		const settings: SettingsPort = {
+			load: () => Promise.reject(new Error('disk unavailable')),
+			save: () => {
+				saveWasCalled = true;
+				return Promise.resolve();
 			},
 		};
-		const { dispatcher } = buildSettingsDispatcher(store);
+		const { dispatcher } = buildSettingsDispatcher(settings);
+		expect(await updateSettings(dispatcher, { language: 'en-US' })).toMatchObject({
+			error: { errorCode: 'SETTINGS_FILE_UNREADABLE' },
+		});
+		expect(saveWasCalled).toBe(false);
+	});
+
+	it('gives CORE_INTERNAL_ERROR, not retryable, when only the save fails, and logs it', async () => {
+		const settings = {
+			...createInMemorySettings(),
+			save: () => Promise.reject(new Error('disk full')),
+		};
+		const { dispatcher, lines } = buildSettingsDispatcher(settings);
+		expect(await updateSettings(dispatcher, { language: 'en-US' })).toMatchObject({
+			ok: false,
+			error: { errorCode: 'CORE_INTERNAL_ERROR', retryable: false },
+		});
+		expect(lines.some((line) => line.event === 'settings.file.write_failed')).toBe(true);
+	});
+
+	it('refuses an unknown key before the settings are read', async () => {
+		let settingsWereRead = false;
+		const settings: SettingsPort = {
+			...createInMemorySettings(),
+			load: () => {
+				settingsWereRead = true;
+				return Promise.resolve(null);
+			},
+		};
+		const { dispatcher } = buildSettingsDispatcher(settings);
 		expect(await updateSettings(dispatcher, { theme: 'dark' })).toMatchObject({
 			error: { errorCode: 'CORE_INPUT_INVALID' },
 		});
-		expect(storeWasRead).toBe(false);
+		expect(settingsWereRead).toBe(false);
 	});
 });
