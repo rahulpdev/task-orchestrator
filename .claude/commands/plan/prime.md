@@ -103,6 +103,8 @@ Correct wording only. Do not change a status, an **Observed**, **Inferred** or *
 
 Save a concise summary covering the headings below. Then return only the path to the saved file and what the document-reviewer's closing instruction says to tell the user, or that the review did not run. Do not repeat the report.
 
+The saved file contains only the parts below, and the Feature Focus part only when a feature is specified. Explain a term inside the part where it first appears.
+
 ### Project Context
 
 **Project:** [name, from the root `README.md` or the configuration files]

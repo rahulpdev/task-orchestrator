@@ -151,6 +151,8 @@ Write a concise, easy-to-scan summary to the report file:
 - **Open questions**:
   - Include only questions that materially affect the user's decision.
 
+The saved file contains only the parts above. Explain a term inside the part where it first appears.
+
 ## Notes
 
 - The `document-reviewer` sub-agent must be present in `.claude/agents/`, or the document review in Step 9 cannot run.

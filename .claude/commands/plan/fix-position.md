@@ -127,6 +127,8 @@ Lay out the clean replacement problem definition from Step 10 in these parts, in
 - `Done means`: short bullet list; each item carries its outcome classification (`must succeed`, `may degrade`, `must warn`, `must fail`, `deferred`)
 - `Open decisions`: short bullet list of decisions the user must resolve before acting on this definition, or `None`
 
+The saved file contains only the parts above. Explain a term inside the part where it first appears.
+
 ## Output (OUTPUT)
 
 ### Human-Readable Report
