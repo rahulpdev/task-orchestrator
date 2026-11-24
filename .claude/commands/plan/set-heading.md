@@ -94,7 +94,7 @@ Follow these steps in order:
 
 10. **Return a concise summary.**
     - Report the path of the saved report on its own line.
-    - State the slug used, then give this reminder: `The slug is yours to choose. Pass the slug you want to /plan:fix-position when you save the problem definition, or it will choose one for you. Rename this report to match if the two differ.`
+    - State the slug used, then give this reminder: `The slug is yours to choose. Name the slug you want in the conversation before you first run /plan:fix-position, or it will choose one for you. Rename this report to match if the two differ.`
     - Report what the document-reviewer's closing instruction says to tell the user, or that the review did not run.
 
 **Decision discipline**
