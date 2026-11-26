@@ -1,5 +1,5 @@
 ---
-description: Spawn multiple pathfinder sub-agents in parallel to independently generate diverse solution options for a given problem definition, save each YAML report to disk, and present a condensed preview without synthesis or interpretation.
+description: Spawn multiple pathfinder sub-agents in parallel to independently generate diverse solution options for a given problem definition, save each YAML report to disk, and return the saved paths without synthesis or interpretation.
 argument-hint: <problem-definition-path> (required - path to the problem definition file)
 allowed-tools: Read, Agent, Bash, Write
 ---
@@ -8,7 +8,7 @@ allowed-tools: Read, Agent, Bash, Write
 
 ## Philosophy (Why this exists)
 
-Diverse solutions emerge when independent thinkers work the same problem without influencing each other. This command enforces that by dispatching the same problem definition to multiple pathfinder agents in parallel, saving each sub-agent's raw YAML report to disk, and returning a condensed preview -- the orchestrating agent must never filter, rank, merge, or interpret the results.
+Diverse solutions emerge when independent thinkers work the same problem without influencing each other. This command enforces that by dispatching the same problem definition to multiple pathfinder agents in parallel, saving each sub-agent's raw YAML report to disk, and returning only where each report was saved -- the orchestrating agent must never filter, rank, merge, or interpret the results.
 
 The definition file is the only channel through which constraints reach the sub-agents. Anything they must honour lives in that file, never in the prompt, so every later reader of the options sees exactly what their authors saw.
 
@@ -52,6 +52,8 @@ Follow these steps in order:
    - Read the file at `$ARGUMENTS`.
    - If the file does not exist or is empty, stop and report the error. Do not proceed.
    - If the file lacks a `Settled decisions and constraints` section or a `Reference files` section, stop and report; the sub-agents would otherwise design against an incomplete definition.
+   - Take `<dir>` and `<slug>` from `$ARGUMENTS` as the Saved File section's naming rule sets out. If the folder does not exist, or the filename does not end in `-problem-definition.md`, stop and report.
+   - Apply the Saved File section's rule for files that already exist before spawning any sub-agent.
    - If the file exists and is complete, note its path for the sub-agent prompts.
 
 2. **Spawn N pathfinder sub-agents in parallel, where N is 3 to 5.**
@@ -65,17 +67,14 @@ Follow these steps in order:
      - An instruction to date any repository history from git rather than file timestamps, to cite the source file for any pattern or example it quotes, and to state where its solution departs from a guide whose name or pattern it adopts.
      - An instruction to check, before returning, that every step in its implementation outline is consistent with its own scope and completion claims, and to resolve or name any contradiction.
 
-3. **Save each sub-agent's YAML report to disk.**
-   - Derive the output directory from `$ARGUMENTS`: `dir = dirname($ARGUMENTS)`. The folder must already exist; if it does not exist, stop and report.
-   - Derive the slug from the problem definition's filename: `slug = basename($ARGUMENTS)` with the `-problem-definition.md` ending removed. The filename is the canonical source of truth for the slug. If the filename does not end in `-problem-definition.md`, stop and report.
+3. **Save each sub-agent's YAML report as the Saved File section describes.**
    - For each sub-agent response, numbered in the order received (1 to N):
      - Extract the YAML report block from the sub-agent's response.
-     - Write it to `$dir/<slug>-option-<i>.yaml` where `<i>` is the sub-agent's sequential number.
+     - Write it to the path the Saved File section gives, where `<i>` is the sub-agent's sequential number.
 
-4. **Present a condensed preview of each sub-agent's response.**
-   - Wait until all YAML reports from step 3 have been saved before presenting.
-   - Format the output exactly as specified in the Output section below.
-   - After presenting all previews, stop.
+4. **Return the final response as the Output section describes.**
+   - Wait until all YAML reports from step 3 have been saved before responding.
+   - After responding, stop.
 
 **Decision discipline**
 
@@ -87,23 +86,30 @@ Follow these steps in order:
 **Quality/Safety constraints**
 
 - Do not modify any files outside the problem-definition's folder (`dirname($ARGUMENTS)`).
-- Do not proceed past step 4. After presenting all responses, stop and wait for the user's explicit instruction.
+- Do not proceed past step 4. After responding, stop and wait for the user's explicit instruction.
+
+## Saved File (OUTPUT)
+
+- **Path**: `<dir>/<slug>-option-<i>.yaml`, one file for each sub-agent
+- **Naming rule**: `<dir>` is the folder of the problem definition, `dirname($ARGUMENTS)`. `<slug>` is the problem definition's filename, `basename($ARGUMENTS)`, with the `-problem-definition.md` ending removed; the filename is the canonical source of truth for the slug. `<i>` is the sub-agent's number in the order its response was received (1 to N).
+- **Written for**: a later command.
+- **If the file already exists**: If any `<slug>-option-<i>.yaml` file is already in `<dir>`, stop and ask before overwriting any of them.
+
+**Layout**
+
+The YAML report block from the sub-agent's response, saved unchanged.
 
 ## Output (OUTPUT)
 
 ### Human-Readable Report (for humans)
 
-Present the following:
+Present the following, and repeat nothing that is in the files:
 
 - **Heading**: `# Parallel Pathfinder Results for $ARGUMENTS`
+- **Status**: `Success`, or `Blocked` with the reason if a file could not be written.
 - **Sub-agent count**: `<N>` (as defined in step 2)
 - **Sub-agent type**: `subagent_type|agent_type` that was invoked
-- For each sub-agent:
-  - `## Option <i>` (where `<i>` is the same receive-order number used in the filename from step 3)
-  - **Name**: the `solution_option.name` value from the sub-agent's YAML report (or "n/a" if absent)
-  - **Summary**: the `summary` value from the sub-agent's YAML report
-  - **Status**: the `status` value from the sub-agent's YAML report
-  - **Full report**: path to the saved YAML file in the problem-definition's folder
+- **Files**: the path of each saved option file, one per line
 - **Footer**: "Awaiting your instruction before proceeding."
 
 Do not add any additional sections, summaries, comparisons, or recommendations.

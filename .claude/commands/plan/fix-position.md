@@ -87,12 +87,11 @@ Follow these steps in order:
     - Carry unresolved ambiguity visibly. Do not smooth over an open decision by silently picking one interpretation; name it as an open decision instead.
     - When the definition is re-issued after new decisions, rebuild it by repeating Steps 1 to 10 and re-run Step 6 on the result rather than patching the previous text.
 11. Save the definition.
-    - Write the clean replacement problem definition from Step 10 to `docs/options/<slug>-problem-definition.md`, in the layout under Saved Definition below, creating the folder if it does not exist and replacing any earlier version.
-    - Use the slug already settled in this conversation. On the first run, make a concise kebab-case slug for the problem, of two to three words.
+    - Write the clean replacement problem definition from Step 10 as the Saved File section describes, creating the folder if it does not exist.
 12. Run the document review.
     - Start the `document-reviewer` sub-agent once, using the agent spawning tool with `subagent_type|agent_type: "document-reviewer"`, and pass it two paths and nothing else: the communication standard at `.agents/reference/communication-standard.md` and the file saved in Step 11.
     - Follow the instruction that closes its response, using Edit on the saved file only.
-    - Correct wording only. Do not add, remove or change a decision, a constraint, a scope item, a reference file or a completion condition, and ignore any finding against a part name listed under Saved Definition.
+    - Correct wording only. Do not add, remove or change a decision, a constraint, a scope item, a reference file or a completion condition. Leave the `Reference files` list exactly as saved, and ignore any finding against it or against a part name listed in the Saved File section.
     - If the sub-agent cannot be started, or reports that it is blocked, leave the file as saved in Step 11 and say so in the report.
 13. Prepare the report.
     - Use the report format under the Output section below. Be precise, and explain any term or label the user may not know where it first appears.
@@ -115,7 +114,14 @@ Follow these steps in order:
 - Do not classify a definition as `Meets required standards` when acting on it would require inventing product behaviour, acceptance thresholds, or failure semantics.
 - Do not put the clean replacement definition in the report; it goes only in the saved file.
 
-## Saved Definition
+## Saved File (OUTPUT)
+
+- **Path**: `docs/options/<slug>-problem-definition.md`
+- **Naming rule**: `<slug>` is the slug already settled in this conversation. On the first run, make a concise kebab-case slug for the problem, of two to three words.
+- **Written for**: a human. Later planning commands also read it.
+- **If the file already exists**: Replace it.
+
+**Layout**
 
 Lay out the clean replacement problem definition from Step 10 in these parts, in this order:
 
@@ -123,7 +129,7 @@ Lay out the clean replacement problem definition from Step 10 in these parts, in
 - `In scope`: short bullet list
 - `Out of scope`: short bullet list
 - `Settled decisions and constraints`: short bullet list of rulings that bind any solution, or `None`
-- `Reference files`: short bullet list of repository paths a solution must honour, or `None`
+- `Reference files`: short bullet list of repository paths a solution must honour, one path per bullet with no description, or `None`
 - `Done means`: short bullet list; each item carries its outcome classification (`must succeed`, `may degrade`, `must warn`, `must fail`, `deferred`)
 - `Open decisions`: short bullet list of decisions the user must resolve before acting on this definition, or `None`
 
@@ -135,6 +141,7 @@ The saved file contains only the parts above. Explain a term inside the part whe
 
 Return a concise, easy-to-scan report:
 
+- **Status**: `Success`, or `Blocked` with the reason if the file could not be written.
 - **Verdict**: Use the exact phrase from Step 9.
 - **Extracted problem definition (as understood)**: 1-3 short sentences, or `No stable problem definition found.`
 - **Decision preservation check**: one short sentence confirming whether settled decisions from Step 3 were preserved during the assessment.

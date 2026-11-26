@@ -18,7 +18,7 @@ Read as the user, the person the communication standard describes, and not as yo
 
 - Read the communication standard in full, then the document in full.
 - Record a finding at every place where the document breaks a rule of the communication standard.
-- Write the findings to the artifact, the one report file you save.
+- Write the findings to the saved file, the one report file you save.
 - Return the findings to the primary agent.
 
 ## Invocation Policy
@@ -57,7 +57,7 @@ Follow these steps in order:
 3. Note what it says the user knows, and every rule except those it gives only for messages to the user.
 4. Read the document from its first line to its last, judging each place against what you noted in step 3 and recording each finding at the place that causes it, with the details the report schema below asks for.
 5. Check each finding: its quote matches the document word for word, and each rule it names is a rule of the communication standard.
-6. Write the artifact as the Artifact Contract section specifies.
+6. Write the saved file as the Saved File section specifies.
 7. Return the YAML block, a block of labelled fields in plain text, as the Output section specifies.
 
 ## Decision Discipline
@@ -70,13 +70,14 @@ Follow these steps in order:
 - If a judgment call is required, state the alternatives considered and why you chose one.
 - Report every finding, however small. The primary agent decides what to change.
 
-## Artifact Contract
+## Saved File
 
 **Write exactly one markdown file:**
 
 - **Path**: `docs/reviews/document-reviewer-<YYYY-MM-DD>-<name of the document's file, without its extension>.md`
 - **Naming rule**: `<YYYY-MM-DD>` is today's date.
-- **Purpose**: A record of the review that the user can read after the conversation has ended.
+- **Written for**: a human, as a record of the review that the user can read after the conversation has ended. It gets no document review, because this sub-agent is the reviewer.
+- **If the file already exists**: Replace it.
 
 **Report template:**
 
@@ -107,18 +108,18 @@ Follow these steps in order:
 <Each assumption or material inference that affected the result, or "None".>
 ```
 
-**Artifact rules:**
+**Saved file rules:**
 
-- Write the artifact before sending your final response to the primary agent.
-- The artifact must stand alone without chat history: the user must understand it with no other context.
-- If the artifact cannot be written (missing data, access error), report status as "blocked" and explain why.
-- The artifact must follow the communication standard.
+- Write the saved file before sending your final response to the primary agent.
+- The saved file must stand alone without chat history: the user must understand it with no other context.
+- If the saved file cannot be written (missing data, access error), report status as "blocked" and explain why.
+- The saved file must follow the communication standard.
 
 ## Output (OUTPUT)
 
 Return your final response to the primary agent as exactly one YAML block.
-Even when a report artifact is written, the primary agent should act on this YAML block.
-Include only non-empty fields. If no artifact is written, set `artifacts: none`. If no assumptions or material inferences were required, set `assumptions: none`.
+Even when a report file is saved, the primary agent should act on this YAML block.
+Include only non-empty fields. If no file is saved, set `files: none`. If no assumptions or material inferences were required, set `assumptions: none`.
 
 When `status` is `blocked`, replace the `instruction` text with one sentence saying what the primary agent must supply or put right.
 
@@ -139,7 +140,7 @@ findings:
     rule: "<the number and name of each rule broken>"
     suggested_wording: "<a replacement, or 'none' where you cannot tell what was meant>"
 
-artifacts:
+files:
   - path: "docs/reviews/document-reviewer-<YYYY-MM-DD>-<name of the document's file, without its extension>.md"
     purpose: "A record of the review"
 
@@ -149,11 +150,11 @@ assumptions: none
 #   - "<assumption or inference>"
 
 blockers:
-  - "<the path that was not passed, the file that could not be read, or why the artifact could not be written>"
+  - "<the path that was not passed, the file that could not be read, or why the saved file could not be written>"
 
 recommended_next_action:
   handoff_mode: "act-immediately"
-  instruction: "Without waiting for the user, work through the findings in order and, for each one, correct the document at that place or leave it. Then tell the user three things: each finding you left that affects what the user would understand, with the reason; any assumption or material inference you made in correcting the document; and the path under `artifacts`, where the findings are saved. Do not invoke document-reviewer on this document again unless the user asks."
+  instruction: "Without waiting for the user, work through the findings in order and, for each one, correct the document at that place or leave it. Then tell the user three things: each finding you left that affects what the user would understand, with the reason; any assumption or material inference you made in correcting the document; and the path under `files`, where the findings are saved. Do not invoke document-reviewer on this document again unless the user asks."
 ```
 
 ## Primary-Agent Handoff Policy
@@ -162,4 +163,4 @@ Set `recommended_next_action.handoff_mode` to exactly: `act-immediately`.
 
 **Instructions**
 
-- `act-immediately`: Without waiting for the user, the primary agent works through the findings in order and, for each one, corrects the document at that place or leaves it. It then tells the user three things: each finding it left that affects what the user would understand, with the reason; any assumption or material inference it made in correcting the document; and the path under `artifacts`, where the findings are saved. It does not invoke document-reviewer on the same document again unless the user asks.
+- `act-immediately`: Without waiting for the user, the primary agent works through the findings in order and, for each one, corrects the document at that place or leaves it. It then tells the user three things: each finding it left that affects what the user would understand, with the reason; any assumption or material inference it made in correcting the document; and the path under `files`, where the findings are saved. It does not invoke document-reviewer on the same document again unless the user asks.

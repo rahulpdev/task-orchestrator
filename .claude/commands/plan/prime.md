@@ -91,17 +91,24 @@ If a specific feature was provided in `$ARGUMENTS`, deep-dive into:
 
 ### 7. Save the Report
 
-Write the report, in the Output Report format below, to `docs/reviews/prime-<YYYY-MM-DD-HHMMSS>.md`. Take the time from `date '+%Y-%m-%d-%H%M%S'`, and create the `docs/reviews/` folder if it does not exist.
+Write the report as the Saved File section describes. Take the time from `date '+%Y-%m-%d-%H%M%S'`, and create the `docs/reviews/` folder if it does not exist.
 
 ### 8. Run the Document Review
 
 Start the `document-reviewer` sub-agent once and pass it two paths and nothing else: the communication standard at `.agents/reference/communication-standard.md` and the report saved in step 7. Follow the instruction that closes its response, using Edit on the report file only.
 
-Correct wording only. Do not change a status, an **Observed**, **Inferred** or **Unknown** label, or a fact, and ignore any finding against a heading or field name the Output Report format fixes. If the sub-agent cannot be started, or reports that it is blocked, leave the report as saved and say so.
+Correct wording only. Do not change a status, an **Observed**, **Inferred** or **Unknown** label, or a fact, and ignore any finding against a heading or field name the Saved File section fixes. If the sub-agent cannot be started, or reports that it is blocked, leave the report as saved and say so.
 
-## Output Report
+## Saved File
 
-Save a concise summary covering the headings below. Then return only the path to the saved file and what the document-reviewer's closing instruction says to tell the user, or that the review did not run. Do not repeat the report.
+- **Path**: `docs/reviews/prime-<YYYY-MM-DD-HHMMSS>.md`
+- **Naming rule**: `<YYYY-MM-DD-HHMMSS>` is the date and time of the run.
+- **Written for**: a human.
+- **If the file already exists**: Each run saves a new file.
+
+**Layout**
+
+Save a concise summary covering the headings below.
 
 The saved file contains only the parts below, and the Feature Focus part only when a feature is specified. Explain a term inside the part where it first appears.
 
@@ -185,3 +192,7 @@ If the project keeps no data between runs, write "None" under this heading.
 - **TAD design:** [key points]
 - **Dependencies:** [what must exist first]
 - **Existing code to build on:** [relevant components]
+
+## Output
+
+Return only the status (`Success`, or `Blocked` with the reason if the file could not be written), the path to the saved file and what the document-reviewer's closing instruction says to tell the user, or that the review did not run. Repeat nothing that is in the file.

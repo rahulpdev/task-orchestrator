@@ -75,27 +75,14 @@ Follow these steps in order:
      - `agent`
      - `breadcrumbs`
      - `response`
-   - Use this markdown structure:
-
-```markdown
-## <response title>
-
-**datetime:** <YYYY-MM-DD HH:MM:SS TZ>
-**agent:** <agent>
-**breadcrumbs:** <breadcrumbs>
-**response:**
-
-<rewritten response>
-```
-
-- Rewrite the source response for brevity before placing it under `response`.
-- Remove unnecessary words, repetition, filler, and over-explanation.
-- Do not remove substantive content or reasoning.
-- Preserve code, commands, paths, filenames, and exact quoted text when changing them would alter the meaning.
+   - Use the entry layout in the Saved File section.
+   - Rewrite the source response for brevity before placing it under `response`.
+   - Remove unnecessary words, repetition, filler, and over-explanation.
+   - Do not remove substantive content or reasoning.
+   - Preserve code, commands, paths, filenames, and exact quoted text when changing them would alter the meaning.
 
 6. **Append the log entry.**
-   - Add the prepared log entry to the end of `docs/backlog/response-log.md`.
-   - If the target file already contains content, separate the new log entry from the previous content with one blank line.
+   - Add the prepared log entry to the file as the Saved File section describes.
 
 7. **Verify the append.**
    - Read `docs/backlog/response-log.md` back.
@@ -107,11 +94,11 @@ Follow these steps in order:
 8. **Run the document review.**
    - Start the `document-reviewer` sub-agent once, using the agent spawning tool with `subagent_type|agent_type: "document-reviewer"`, and pass it two paths and nothing else: the communication standard at `.agents/reference/communication-standard.md` and `docs/backlog/response-log.md`.
    - Follow the instruction that closes its response, using Edit on the entry verified in Step 7 only.
-   - Correct wording only. Do not remove substantive content or reasoning, and ignore any finding outside that entry or against a field name the structure in Step 5 fixes.
+   - Correct wording only. Do not remove substantive content or reasoning, and ignore any finding outside that entry or against a field name the Saved File section fixes.
    - If the sub-agent cannot be started, or reports that it is blocked, leave the entry as verified in Step 7 and say so in the report.
 
 9. **Prepare the report.**
-   - Use the Human-Readable Report format below.
+   - Use the Human-Readable Report in the Output section.
 
 **Decision discipline**
 
@@ -130,16 +117,37 @@ Follow these steps in order:
 - The rewritten response should communicate the same content with fewer words, not less meaning.
 - Do not claim success unless the new entry is verified at the end of the target file.
 
+## Saved File (OUTPUT)
+
+- **Path**: `docs/backlog/response-log.md`
+- **Naming rule**: The name is fixed.
+- **Written for**: a human.
+- **If the file already exists**: Add the new entry to the end. If the file already contains content, separate the new entry from it with one blank line.
+
+**Layout**
+
+Each run adds one entry in this structure:
+
+```markdown
+## <response title>
+
+**datetime:** <YYYY-MM-DD HH:MM:SS TZ>
+**agent:** <agent>
+**breadcrumbs:** <breadcrumbs>
+**response:**
+
+<rewritten response>
+```
+
 ## Output (OUTPUT)
 
 ### Human-Readable Report (for humans)
 
-Return a concise, easy-to-scan summary:
+Return a concise, easy-to-scan summary. Beyond the items below, repeat nothing that is in the file:
 
-- **Status**: `Success` | `Blocked`
-- **Artifact**: `docs/backlog/response-log.md`
-- **Heading**: `<response title>`
-- **Breadcrumbs**: `<breadcrumbs>`
+- **Status**: `Success`, or `Blocked` with the reason, including when the file could not be written.
+- **File**: `docs/backlog/response-log.md`
+- **Heading**: `<response title>`, which says which entry was added
 - **Document review**: what the document-reviewer's closing instruction says to tell the user, or that the review did not run.
 - **Questions (omit if success)**:
   - Ask only for a no-argument re-run or the response text if it was not available verbatim.

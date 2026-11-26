@@ -91,7 +91,7 @@ Follow these steps in order:
 ## Output (OUTPUT)
 
 Return your final response to the primary agent as exactly one YAML block.
-Include only non-empty fields. If no artifact is written, set `artifacts: none`. If no assumptions or material inferences were required, set `assumptions: none`.
+Include only non-empty fields. If no file is saved, set `files: none`. If no assumptions or material inferences were required, set `assumptions: none`.
 
 **Report schema:**
 
@@ -156,7 +156,7 @@ alternatives_considered:
     comparative_observations:
       - "How this alternative factually differs from the selected option"
 
-artifacts: none
+files: none
 
 assumptions: none
 # Replace `assumptions: none` with a list when any assumption or material inference affected the result.
