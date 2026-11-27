@@ -53,7 +53,6 @@ Follow these steps in order:
    - If the file does not exist or is empty, stop and report the error. Do not proceed.
    - If the file lacks a `Settled decisions and constraints` section or a `Reference files` section, stop and report; the sub-agents would otherwise design against an incomplete definition.
    - Take `<dir>` and `<slug>` from `$ARGUMENTS` as the Saved File section's naming rule sets out. If the folder does not exist, or the filename does not end in `-problem-definition.md`, stop and report.
-   - Apply the Saved File section's rule for files that already exist before spawning any sub-agent.
    - If the file exists and is complete, note its path for the sub-agent prompts.
 
 2. **Spawn N pathfinder sub-agents in parallel, where N is 3 to 5.**
@@ -68,6 +67,7 @@ Follow these steps in order:
      - An instruction to check, before returning, that every step in its implementation outline is consistent with its own scope and completion claims, and to resolve or name any contradiction.
 
 3. **Save each sub-agent's YAML report as the Saved File section describes.**
+   - Apply the Saved File section's rule for files that already exist before writing any file.
    - For each sub-agent response, numbered in the order received (1 to N):
      - Extract the YAML report block from the sub-agent's response.
      - Write it to the path the Saved File section gives, where `<i>` is the sub-agent's sequential number.
@@ -93,7 +93,7 @@ Follow these steps in order:
 - **Path**: `<dir>/<slug>-option-<i>.yaml`, one file for each sub-agent
 - **Naming rule**: `<dir>` is the folder of the problem definition, `dirname($ARGUMENTS)`. `<slug>` is the problem definition's filename, `basename($ARGUMENTS)`, with the `-problem-definition.md` ending removed; the filename is the canonical source of truth for the slug. `<i>` is the sub-agent's number in the order its response was received (1 to N).
 - **Written for**: a later command.
-- **If the file already exists**: If any `<slug>-option-<i>.yaml` file is already in `<dir>`, stop and ask before overwriting any of them.
+- **If the file already exists**: Replace the whole set. Delete every `<slug>-option-<i>.yaml` file already in `<dir>`, then save the new files.
 
 **Layout**
 

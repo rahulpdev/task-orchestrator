@@ -144,7 +144,7 @@ Follow these steps in order:
 - **Path**: `docs/options/<slug>-heading.md`
 - **Naming rule**: `<slug>` is a concise kebab-case slug, of three words where three are clear, made from the name of the primary feature recommended in Step 6.
 - **Written for**: a human.
-- **If the file already exists**: Stop and ask before overwriting it.
+- **If the file already exists**: Replace it.
 
 **Layout**
 

@@ -101,15 +101,17 @@ A difference is material if it could influence rank ordering — it represents a
 
 When the differences between options are only marginal — when options address the problem roughly equally well — apply this tie-break sequence: (1) prefer higher reversibility (easier to change if wrong), (2) prefer fewer unresolved uncertainties, (3) prefer the simpler option. State which tie-break rule resolved the position.
 
-9. **Write the report.** Write the report to the path specified in the Saved File section, using the current timestamp.
+9. **Read the communication standard.** Read `.agents/reference/communication-standard.md` in full. The report must follow it.
 
-10. **Run the document review.** Start the `document-reviewer` sub-agent once and pass it two paths and nothing else: the communication standard at `.agents/reference/communication-standard.md` and the path of the saved file. Follow the instruction that closes its response, with these limits:
+10. **Write the report.** Write the report to the path specified in the Saved File section.
+
+11. **Run the document review.** Start the `document-reviewer` sub-agent once and pass it two paths and nothing else: the communication standard at `.agents/reference/communication-standard.md` and the path of the saved file. Follow the instruction that closes its response, with these limits:
    - Correct wording only. Do not change a ranking, an alignment score, a reversibility rating, or a tie-break.
    - Ignore any finding against a heading, table column, or field name the report template fixes.
    - You cannot tell the user anything directly, so record under `document_review` in your output what that instruction says to tell the user.
    - If the sub-agent cannot be started, or reports that it is blocked, set `document_review.status` to `not-run` and continue.
 
-11. **Return the YAML handoff.** Produce the final YAML block as specified in the Output section.
+12. **Return the YAML handoff.** Produce the final YAML block as specified in the Output section.
 
 ## Decision Discipline
 
@@ -126,10 +128,10 @@ When the differences between options are only marginal — when options address 
 
 **Write exactly one markdown file:**
 
-- **Path**: `<dir>/<slug>-options-evaluation-<YYYYMMDD-HHmmss>.md`, where `<dir>` is the directory containing the problem-definition file (`dirname(problem_definition_path)`) and `<slug>` is the problem-definition filename with its `-problem-definition.md` ending removed (`basename(problem_definition_path)` minus that ending). The filename is the canonical source of truth for the slug.
-- **Naming rule**: kebab-case, include ISO datetime
+- **Path**: `<dir>/<slug>-options-evaluation.md`, where `<dir>` is the directory containing the problem-definition file (`dirname(problem_definition_path)`) and `<slug>` is the problem-definition filename with its `-problem-definition.md` ending removed (`basename(problem_definition_path)` minus that ending). The filename is the canonical source of truth for the slug.
+- **Naming rule**: kebab-case
 - **Written for**: a human. The primary agent also reads it.
-- **If the file already exists**: Each run saves a new file.
+- **If the file already exists**: Replace it.
 
 **Report template:**
 
@@ -258,7 +260,7 @@ option_set_gaps:
   - "Any criterion where all options are weak"
 
 files:
-  - path: "<dir>/<slug>-options-evaluation-<YYYYMMDD-HHmmss>.md"
+  - path: "<dir>/<slug>-options-evaluation.md"
     purpose: "Complete ranked evaluation of all solution options"
 
 assumptions: none
