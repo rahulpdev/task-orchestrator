@@ -75,6 +75,7 @@ Follow these steps in order:
    - Extract the exact `status` value from the Navigator handoff report.
    - Extract the exact `summary` value from the Navigator handoff report.
    - Extract the exact `document_review.status` value from the Navigator handoff report.
+   - Extract the exact `document_review.findings_saved_at` value from the Navigator handoff report, if it is present.
    - Record the exact `subagent_type` or `agent_type` value used in Step 2.
    - Do not include rankings, criteria, close calls, gaps, assumptions, blockers, coverage, next actions, or any other Navigator handoff fields.
 
@@ -106,7 +107,7 @@ Return only this concise report:
 - **File confirmation**: confirmed `<file-path>` exists and is non-empty, or state that confirmation failed.
 - **Sub-agent status**: the exact `status` field from the Navigator handoff report.
 - **Sub-agent summary**: the exact `summary` field from the Navigator handoff report.
-- **Document review**: the exact `document_review.status` field from the Navigator handoff report.
+- **Document review**: the exact `document_review.status` field from the Navigator handoff report, then the exact `document_review.findings_saved_at` path if the report gives one.
 - **Next**: `Awaiting your explicit instruction before proceeding.`
 
 Do not add any additional sections, rankings, recommendations, or commentary.
