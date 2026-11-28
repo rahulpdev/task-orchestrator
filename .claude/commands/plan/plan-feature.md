@@ -397,6 +397,12 @@ Execute every command to ensure zero regressions and 100% feature correctness.
 
 ---
 
+## DEPARTURES
+
+<Only when the Departure Check ran. One bullet for each place the Plan departs from the problem definition or the solution option: what the Plan does, what the definition or the option says, where the departure comes from (a ruling the definition records, the option, or the Plan's own choice), and "Contradicts the definition" where the Plan does something an item under the definition's `Settled decisions and constraints` or `Done means` rules out. Write "None" when there are none.>
+
+---
+
 ## NOTES
 
 <Additional context, design decisions, trade-offs>
@@ -444,9 +450,21 @@ Execute every command to ensure zero regressions and 100% feature correctness.
 
 **Confidence Score**: #/10 that execution will succeed on first attempt
 
+## Departure Check
+
+When the feature description names a problem definition or a solution option in `docs/options/`, check the Plan against them after creating it and before the document review. Skip this section when it names neither.
+
+1. Read the named files in full. When only a solution option is named, also read the problem definition it belongs to, found as the Saved File section's naming rule sets out.
+2. Take each item under the definition's `Settled decisions and constraints` and `Done means`, and each decision and assumption the option states, and find the part of the Plan that covers it. Record a departure wherever the Plan does something different, does something more, or covers the item nowhere.
+3. Correct the Plan, using Edit on the Plan file only, where a departure is an error with one right answer: two parts of the Plan contradict each other, or the Plan states a fact that is wrong. Correct no other departure.
+4. List every departure that remains under the Plan's `DEPARTURES` heading, as the layout in the Saved File section sets out.
+5. Leave the problem definition and the solution option unchanged.
+
+If a named file cannot be read, leave the Plan as it is and say in the final response that the departure check did not run.
+
 ## Document Review
 
-After creating the Plan, start the `document-reviewer` sub-agent once and pass it two paths and nothing else: the communication standard at `.agents/reference/communication-standard.md` and the full path to the Plan file. Follow the instruction that closes its response, except that you ignore any finding against a heading or task keyword the layout in the Saved File section fixes.
+After the departure check, start the `document-reviewer` sub-agent once and pass it two paths and nothing else: the communication standard at `.agents/reference/communication-standard.md` and the full path to the Plan file. Follow the instruction that closes its response, except that you ignore any finding against a heading or task keyword the layout in the Saved File section fixes.
 
 ## Output
 
@@ -455,4 +473,5 @@ After creating the Plan, provide the items below. Beyond them, repeat nothing th
 - Status: `Success`, or `Blocked` with the reason if the file could not be written
 - Full path to created Plan file
 - Estimated confidence score for one-pass success
+- Departures, when the feature description named a problem definition or a solution option: how many the Plan lists and how many of those contradict the definition, or that the departure check did not run
 - What the document-reviewer's closing instruction says to tell the user
